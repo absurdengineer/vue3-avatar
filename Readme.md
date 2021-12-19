@@ -28,8 +28,9 @@ vue3-avatar is very easy to use.
 
 ### ES6
 
-```
+**For Local Registration**
 
+```
 import Avatar from "vue3-avatar";
 
 export default {
@@ -40,7 +41,20 @@ export default {
     },
     ...
 }
+```
 
+**For Global Registration**
+
+Update main.js
+
+```
+import { createApp } from "vue";
+import App from "./App.vue";
+...
+import Avatar from "vue3-avatar";
+
+createApp(App).component("avatar", Avatar)
+...
 ```
 
 After importing the component, you can use it in your templates as:
