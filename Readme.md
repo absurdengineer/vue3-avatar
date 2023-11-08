@@ -77,4 +77,4 @@ After importing the component, you can use it in your templates as:
 
 ## Creator
 
-This component has been created by [Md Dilshad Alam](https://github.com/webformulator)
+[Mohammad Dilshad Alam](https://github.com/absurdengineer) created and maintains this component.
