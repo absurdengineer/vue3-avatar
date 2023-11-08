@@ -1,6 +1,6 @@
 {
   "name": "vue3-avatar",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "dist/avatar.ssr.js",
   "browser": "dist/avatar.esm.js",
