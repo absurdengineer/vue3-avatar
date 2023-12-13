@@ -1,5 +1,23 @@
 <template>
+  <img
+    :style="{
+      display: inline && 'inline-flex',
+      borderRadius: rounded && '50%',
+      margin: 0,
+      padding: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }"
+    :height="size"
+    :width="size"
+    v-if="showImage()"
+    :src="imageSrc"
+    :alt="displayName"
+    @error="imageError = true"
+  />
   <div
+    v-else
     :style="{
       color: displayColor,
       width: size + 'px',
@@ -180,6 +198,7 @@ export default {
     },
     size: {
       type: Number,
+      default: 40,
     },
     inverted: {
       type: Boolean,
@@ -193,6 +212,15 @@ export default {
       type: Boolean,
       default: true,
     },
+    imageSrc: {
+      type: String,
+      default: null,
+    },
+  },
+  data: () => {
+    return {
+      imageError: false,
+    };
   },
   computed: {
     fontSize() {
@@ -242,6 +270,11 @@ export default {
     },
     lightColor() {
       return lightColors[this.asciiValue % lightColors.length];
+    },
+  },
+  methods: {
+    showImage() {
+      return this.imageSrc && !this.imageError;
     },
   },
 };

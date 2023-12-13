@@ -11,6 +11,8 @@ This component computes the Initials from provided name with following rules:
 3. Maximum length of Avatar letters is 3.
 4. If the name is splitted into more than 2 parts then picks the first letter of part1, part2 and last part.
 
+This component can now also show an image by setting the `imageSrc` prop. If an error occurs in fetching the image from the provided source, the component falls back to Initials.
+
 ## Examples
 
 - **Tony** will become **T**
@@ -74,6 +76,7 @@ After importing the component, you can use it in your templates as:
 | inverted   | false    | Boolean | false   | To Invert the text color with Background color |
 | inline     | false    | Boolean | false   | To create inline Avatar                        |
 | rounded    | false    | Boolean | true    | Square or Rounded                              |
+| imageSrc   | false    | String  | null    | To show an Image                               |
 
 ## Creator
 
