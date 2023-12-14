@@ -1,37 +1,49 @@
 <template>
-  <img
-    :style="{
-      display: inline && 'inline-flex',
-      borderRadius: rounded && '50%',
-      margin: 0,
-      padding: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      border: border && `2px solid ${borderColor}`,
-    }"
-    :height="size"
-    :width="size"
-    v-if="showImage()"
-    :src="imageSrc"
-    :alt="displayName"
-    @error="imageError = true"
-  />
-  <div
-    v-else
-    :style="{
-      color: displayColor,
-      width: size + 'px',
-      height: size + 'px',
-      fontSize: fontSize + 'px',
-      background: displayBackground,
-      display: inline && 'inline-flex',
-      borderRadius: rounded && '50%',
-      border: border && `2px solid ${borderColor}`,
-    }"
-    class="avatar noselect"
-  >
-    {{ displayName }}
+  <div class="container">
+    <img
+      :style="{
+        display: inline && 'inline-flex',
+        borderRadius: rounded && '50%',
+        margin: 0,
+        padding: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: border && `${size / 20}px solid ${borderColor}`,
+      }"
+      :height="size"
+      :width="size"
+      v-if="showImage()"
+      :src="imageSrc"
+      :alt="displayName"
+      @error="imageError = true"
+    />
+    <div
+      v-else
+      :style="{
+        color: displayColor,
+        width: size + 'px',
+        height: size + 'px',
+        fontSize: fontSize + 'px',
+        background: displayBackground,
+        display: inline && 'inline-flex',
+        borderRadius: rounded && '50%',
+        border: border && `${size / 20}px solid ${borderColor}`,
+      }"
+      class="avatar noselect"
+    >
+      {{ displayName }}
+    </div>
+    <div
+      v-if="status"
+      class="status-indicator"
+      :style="{
+        height: `${size / 4}px`,
+        width: `${size / 4}px`,
+        backgroundColor: statusBackgroundColor,
+        border: `${size / 30}px solid ${sameBorder ? borderColor : 'white'}`,
+      }"
+    ></div>
   </div>
 </template>
 
@@ -185,6 +197,12 @@ const darkColors = [
   "#4682B4",
   "#008080",
 ];
+const BORDERCOLORS = {
+  ONLINE: "green",
+  OFFLINE: "grey",
+  AWAY: "orange",
+  BUSY: "red",
+};
 export default {
   name: "Avatar",
   props: {
@@ -224,6 +242,17 @@ export default {
     borderColor: {
       type: String,
       default: "white",
+    },
+    status: {
+      type: String,
+      default: null,
+      validator: function (value) {
+        return ["away", "online", "offline", "busy"].includes(value);
+      },
+    },
+    sameBorder: {
+      type: Boolean,
+      default: false,
     },
   },
   data: () => {
@@ -280,6 +309,23 @@ export default {
     lightColor() {
       return lightColors[this.asciiValue % lightColors.length];
     },
+    statusBackgroundColor() {
+      let color;
+      switch (this.status.toLowerCase()) {
+        case "away":
+          color = BORDERCOLORS.AWAY;
+          break;
+        case "online":
+          color = BORDERCOLORS.ONLINE;
+          break;
+        case "offline":
+          color = BORDERCOLORS.OFFLINE;
+          break;
+        default:
+          color = BORDERCOLORS.BUSY;
+      }
+      return color;
+    },
   },
   methods: {
     showImage() {
@@ -311,5 +357,14 @@ export default {
   -moz-user-select: none; /* Old versions of Firefox */
   -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+}
+.container {
+  position: relative;
+}
+.status-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  border-radius: 50%;
 }
 </style>
