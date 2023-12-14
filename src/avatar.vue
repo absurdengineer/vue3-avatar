@@ -8,6 +8,7 @@
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
+      border: border && `2px solid ${borderColor}`,
     }"
     :height="size"
     :width="size"
@@ -26,6 +27,7 @@
       background: displayBackground,
       display: inline && 'inline-flex',
       borderRadius: rounded && '50%',
+      border: border && `2px solid ${borderColor}`,
     }"
     class="avatar noselect"
   >
@@ -214,7 +216,14 @@ export default {
     },
     imageSrc: {
       type: String,
-      default: null,
+    },
+    border: {
+      type: Boolean,
+      default: true,
+    },
+    borderColor: {
+      type: String,
+      default: "white",
     },
   },
   data: () => {

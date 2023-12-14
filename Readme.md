@@ -67,16 +67,18 @@ After importing the component, you can use it in your templates as:
 
 ## Props
 
-| Property   | Required | Type    | Default | Decription                                     |
-| ---------- | -------- | ------- | ------- | ---------------------------------------------- |
-| name       | true     | String  | -       | Name to compute Avatar letters                 |
-| color      | false    | String  | white   | Text color for Avatar letters                  |
-| background | false    | String  | navy    | Background color for Avatar                    |
-| size       | false    | Number  | 40      | Pixel size for Avatar (Same Height and Width)  |
-| inverted   | false    | Boolean | false   | To Invert the text color with Background color |
-| inline     | false    | Boolean | false   | To create inline Avatar                        |
-| rounded    | false    | Boolean | true    | Square or Rounded                              |
-| imageSrc   | false    | String  | null    | To show an Image                               |
+| Property    | Required | Type    | Default | Decription                                     |
+| ----------- | -------- | ------- | ------- | ---------------------------------------------- |
+| name        | true     | String  | -       | Name to compute Avatar letters                 |
+| color       | false    | String  | white   | Text color for Avatar letters                  |
+| background  | false    | String  | navy    | Background color for Avatar                    |
+| size        | false    | Number  | 40      | Pixel size for Avatar (Same Height and Width)  |
+| inverted    | false    | Boolean | false   | To Invert the text color with Background color |
+| inline      | false    | Boolean | false   | To create inline Avatar                        |
+| rounded     | false    | Boolean | true    | Square or Rounded                              |
+| imageSrc    | false    | String  | null    | To show an Image                               |
+| border      | false    | Boolean | true    | Show or Hide the border                        |
+| borderColor | false    | String  | white   | Border color for avatar                        |
 
 ## Creator
 

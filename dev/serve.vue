@@ -12,12 +12,18 @@ export default defineComponent({
 
 <template>
   <div id="app">
-    <avatar name="Mohammad Dilshad Alam" :inline="false" />
+    <avatar
+      :size="120"
+      name="Mohammad Dilshad Alam"
+      :inline="false"
+      borderColor="black"
+    />
     <avatar
       name="Mohammad Dilshad Alam"
       imageSrc="https://marketplace.canva.com/EAFltIh8PKg/1/0/1600w/canva-cute-anime-cartoon-illustration-girl-avatar-J7nVyTlhTAE.jpg"
       :inline="false"
       :rounded="true"
+      borderColor="black"
     />
   </div>
 </template>
