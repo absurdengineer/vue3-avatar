@@ -85,6 +85,8 @@ After importing the component, you can use it in your templates as:
 | borderColor | false    | String  | white   | Border color for avatar                                      |
 | status      | false    | String  | white   | To set user status as "online", "away", "offline", or "busy" |
 | sameBorder  | false    | Boolean | false   | To have same border in Avatar as well as Status Indicator    |
+| customAvatarStyle  | false    | Object | {}   | A custom style object to personalize the avatar apperance |
+| customStatusStyle  | false    | Object | {}   | A custom style object to personalize the status indicator |
 
 ## Creator
 
