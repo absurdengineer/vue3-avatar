@@ -1,16 +1,7 @@
 <template>
   <div class="container">
     <img
-      :style="{
-        display: inline && 'inline-flex',
-        borderRadius: rounded && '50%',
-        margin: 0,
-        padding: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        border: border && `${size / 20}px solid ${borderColor}`,
-      }"
+      :style="imageStyle"
       :height="size"
       :width="size"
       v-if="showImage()"
@@ -20,16 +11,7 @@
     />
     <div
       v-else
-      :style="{
-        color: displayColor,
-        width: size + 'px',
-        height: size + 'px',
-        fontSize: fontSize + 'px',
-        background: displayBackground,
-        display: inline && 'inline-flex',
-        borderRadius: rounded && '50%',
-        border: border && `${size / 20}px solid ${borderColor}`,
-      }"
+      :style="avatarStyle"
       class="avatar noselect"
     >
       {{ displayName }}
@@ -37,13 +19,9 @@
     <div
       v-if="status"
       class="status-indicator"
-      :style="{
-        height: `${size / 4}px`,
-        width: `${size / 4}px`,
-        backgroundColor: statusBackgroundColor,
-        border: `${size / 30}px solid ${sameBorder ? borderColor : 'white'}`,
-      }"
-    ></div>
+      :style="statusStyle"
+    >
+  </div>
   </div>
 </template>
 
@@ -243,12 +221,20 @@ export default {
       type: String,
       default: "white",
     },
+    customAvatarStyle: {
+      type: Object,
+      default: () => ({}), 
+    },
     status: {
       type: String,
       default: null,
       validator: function (value) {
         return ["away", "online", "offline", "busy"].includes(value);
       },
+    },
+    customStatusStyle: {
+      type: Object,
+      default: () => ({}), 
     },
     sameBorder: {
       type: Boolean,
@@ -261,6 +247,40 @@ export default {
     };
   },
   computed: {
+    statusStyle() {
+      const defaultStatusStyle = {
+        height: `${this.size / 4}px`,
+        width: `${this.size / 4}px`,
+        backgroundColor: this.statusBackgroundColor,
+        border: `${this.size / 30}px solid ${this.sameBorder ? this.borderColor : 'white'}`,
+      };
+      return Object.assign({}, defaultStatusStyle, this.customStatusStyle);
+    },
+    imageStyle() {
+      const defaultImageStyle = {
+        display: this.inline ? 'inline-flex' : 'flex',
+        borderRadius: this.rounded ? '50%' : '0',
+        margin: 0,
+        padding: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: this.border ? `${this.size / 20}px solid ${this.borderColor}` : 'none',
+      };
+      return Object.assign({}, defaultImageStyle, this.customAvatarStyle);
+    },
+    avatarStyle(){
+      const defaultAvatarStyle = {
+        color: this.displayColor,
+        width: this.size + 'px',
+        height: this.size + 'px',
+        fontSize: this.fontSize + 'px',
+        background: this.displayBackground,
+        display: this.inline && 'inline-flex',
+        borderRadius: this.rounded && '50%',
+        border: this.border && `${this.size / 20}px solid ${this.borderColor}`,
+      };
+      return Object.assign({}, defaultAvatarStyle, this.customAvatarStyle);
+    },
     fontSize() {
       const size = this.size || 40;
       if (this.displayName.length == 1) return size / 2;
@@ -359,7 +379,7 @@ export default {
   user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 }
 .container {
-  position: relative;
+  position:relative;
 }
 .status-indicator {
   position: absolute;
