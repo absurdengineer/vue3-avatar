@@ -246,7 +246,10 @@ export default {
       type: Boolean,
       default: false,
     },
-    legacyAvatarColors: {
+    /**
+     * @deprecated Use original vue-avatar color palette for backwards compatibility
+     */
+    useLegacyColors: {
       type: Boolean,
       default: false,
     },
@@ -313,28 +316,20 @@ export default {
       else return "";
     },
     displayBackground() {
-      if (this.background) {
-        return this.background;
-      }
-      if (this.legacyAvatarColors) {
-        return this.inverted
-          ? this.legacyFontColor
-          : this.legacyBackgroundColor;
-      }
-      return this.inverted
+      return this.background
+        ? this.background
+        : this.useLegacyColors
+        ? this.legacyBackgroundColor
+        : this.inverted
         ? this.lightColor
         : this.darkColor;
     },
     displayColor() {
-      if (this.color) {
-        return this.color;
-      }
-      if (this.legacyAvatarColors) {
-        return this.inverted
-          ? this.legacyBackgroundColor
-          : this.legacyFontColor;
-      }
-      return this.inverted
+      return this.color
+        ? this.color
+        : this.useLegacyColors
+        ? this.legacyFontColor
+        : this.inverted
         ? this.darkColor
         : this.lightColor;
     },
@@ -355,7 +350,7 @@ export default {
       if (!this.name || typeof this.name !== 'string') {
         return legacyBackgroundColors[0];
       }
-      const index = this.asciiValue % legacyBackgroundColors.length;
+      const index = (this.name.length || 0) % legacyBackgroundColors.length;
       return legacyBackgroundColors[index];
     },
     legacyFontColor() {

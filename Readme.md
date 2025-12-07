@@ -87,7 +87,7 @@ After importing the component, you can use it in your templates as:
 | sameBorder  | false    | Boolean | false   | To have same border in Avatar as well as Status Indicator    |
 | customAvatarStyle  | false    | Object | {}   | A custom style object to personalize the avatar apperance |
 | customStatusStyle  | false    | Object | {}   | A custom style object to personalize the status indicator |
-| legacyAvatarColors | false | Boolean | false | Use original vue-avatar color palette for backwards compatibility |
+| useLegacyColors | false | Boolean | false | @deprecated Use original vue-avatar color palette for backwards compatibility |
 
 ## Color Systems
 
@@ -101,10 +101,10 @@ By default, the component uses a modern color palette with light colors for text
 ```
 
 ### Legacy Colors (vue-avatar compatible)
-For backwards compatibility with the original vue-avatar component, you can enable the legacy color palette by setting `legacyAvatarColors` to `true`. This uses the original 18-color palette from vue-avatar.
+**@deprecated** For backwards compatibility with the original vue-avatar component, you can enable the legacy color palette by setting `useLegacyColors` to `true`. This uses the original 18-color palette from vue-avatar.
 
 ```vue
-<avatar name="John Doe" :legacy-avatar-colors="true" />
+<avatar name="John Doe" :use-legacy-colors="true" />
 ```
 
 **Note:** The legacy color system uses a hash-based algorithm to ensure consistent color assignment based on the user's name, so the same name will always get the same color.
