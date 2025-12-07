@@ -181,6 +181,12 @@ const BORDERCOLORS = {
   AWAY: "orange",
   BUSY: "red",
 };
+const legacyBackgroundColors = [
+  '#F44336', '#FF4081', '#9C27B0', '#673AB7',
+  '#3F51B5', '#2196F3', '#03A9F4', '#00BCD4', '#009688',
+  '#4CAF50', '#8BC34A', '#CDDC39', '#FFC107',
+  '#FF9800', '#FF5722', '#795548', '#9E9E9E', '#607D8B',
+];
 export default {
   name: "Avatar",
   props: {
@@ -237,6 +243,13 @@ export default {
       default: () => ({}), 
     },
     sameBorder: {
+      type: Boolean,
+      default: false,
+    },
+    /**
+     * @deprecated Use original vue-avatar color palette for backwards compatibility
+     */
+    useLegacyColors: {
       type: Boolean,
       default: false,
     },
@@ -305,6 +318,8 @@ export default {
     displayBackground() {
       return this.background
         ? this.background
+        : this.useLegacyColors
+        ? this.legacyBackgroundColor
         : this.inverted
         ? this.lightColor
         : this.darkColor;
@@ -312,6 +327,8 @@ export default {
     displayColor() {
       return this.color
         ? this.color
+        : this.useLegacyColors
+        ? this.legacyFontColor
         : this.inverted
         ? this.darkColor
         : this.lightColor;
@@ -328,6 +345,17 @@ export default {
     },
     lightColor() {
       return lightColors[this.asciiValue % lightColors.length];
+    },
+    legacyBackgroundColor() {
+      if (!this.name || typeof this.name !== 'string') {
+        return legacyBackgroundColors[0];
+      }
+      const index = (this.name.length || 0) % legacyBackgroundColors.length;
+      return legacyBackgroundColors[index];
+    },
+    legacyFontColor() {
+      if (!this.name) return '#FFFFFF';
+      return this.lightenColor(this.legacyBackgroundColor, 80);
     },
     statusBackgroundColor() {
       let color;
@@ -350,6 +378,23 @@ export default {
   methods: {
     showImage() {
       return this.imageSrc && !this.imageError;
+    },
+    lightenColor(hex, amt) {
+      if (!/^#[0-9A-Fa-f]{6}$/i.test(hex)) {
+        return '#FFFFFF';
+      }
+
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+
+      const newR = Math.min(255, r + amt);
+      const newG = Math.min(255, g + amt);
+      const newB = Math.min(255, b + amt);
+
+      const toHex = (n) => n.toString(16).padStart(2, '0').toUpperCase();
+
+      return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
     },
   },
 };
