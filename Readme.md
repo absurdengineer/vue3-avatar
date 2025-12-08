@@ -109,6 +109,10 @@ By default, the component uses a modern color palette with light colors for text
 
 **Note:** The legacy color system uses a hash-based algorithm to ensure consistent color assignment based on the user's name, so the same name will always get the same color.
 
+## Developer Notes
+
+This package is built with the **node v16.20.2 (npm v8.19.4)**
+
 ## Creator
 
 [Mohammad Dilshad Alam](https://github.com/absurdengineer) created and maintains this component.
