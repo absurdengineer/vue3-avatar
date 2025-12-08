@@ -1,6 +1,6 @@
 <script>
-import { defineComponent } from "vue";
 import Avatar from "@/avatar.vue";
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "ServeDev",
@@ -18,6 +18,13 @@ export default defineComponent({
         name="Mohammad Dilshad Alam"
         :inline="false"
         borderColor="black"
+      />
+      <avatar
+        :size="80"
+        name="Mohammad Dilshad Alam"
+        :inline="false"
+        borderColor="black"
+        :useLegacyColors="true"
       />
      <div style="display: inline-block;">
       <avatar
