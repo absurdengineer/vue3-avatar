@@ -1,5 +1,5 @@
 <script>
-import Avatar from "@/avatar.vue";
+import Avatar from "@/components/Avatar.vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
