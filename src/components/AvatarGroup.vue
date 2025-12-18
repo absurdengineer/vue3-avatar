@@ -13,6 +13,8 @@ export default defineComponent({
       default: 'stack', // stack | triangle
       validator: (value) => ['stack', 'triangle'].includes(value),
     },
+    onClick: { type: Function, default: null },
+    pointer: { type: Boolean, default: false },
   },
   setup(props, { slots }) {
     
@@ -39,13 +41,35 @@ export default defineComponent({
       let visible = children;
       let overflowCount = 0;
       
-      if (props.max && children.length > props.max) {
-        visible = children.slice(0, props.max);
-        overflowCount = children.length - props.max;
+      let effectiveMax = props.max;
+      if (props.layout === 'triangle') {
+        const limit = props.max ? Math.min(props.max, 3) : 3;
+        if (children.length > limit) {
+          effectiveMax = limit - 1; 
+        } else {
+          effectiveMax = limit;
+        }
       }
       
+      if (effectiveMax && children.length > effectiveMax) {
+        visible = children.slice(0, effectiveMax);
+        overflowCount = children.length - effectiveMax;
+      }
+      
+      const allNames = children
+          .map(child => child.props && child.props.name)
+          .filter(Boolean)
+          .join(', ');
+
+      const hiddenChildren = overflowCount > 0 ? children.slice(effectiveMax) : [];
+      const hiddenNames = hiddenChildren
+          .map(child => child.props && child.props.name)
+          .filter(Boolean)
+          .join(', ');
+
       const overflowBadge = overflowCount > 0 ? h('div', { 
          class: 'avatar-overflow',
+         title: hiddenNames,
          style: {
              width: `${props.size}px`,
              height: `${props.size}px`,
@@ -61,7 +85,13 @@ export default defineComponent({
       });
 
       return h('div', { 
-          class: ['avatar-group', `layout-${props.layout}`],
+          class: [
+            'avatar-group', 
+            `layout-${props.layout}`,
+            { 'is-clickable': props.pointer || !!props.onClick }
+          ],
+          title: allNames,
+          onClick: (e) => props.onClick && props.onClick(e),
           style: {
              '--va-group-overlap': `-${props.overlap}px`,
              '--va-size': `${props.size}px`,
@@ -80,6 +110,12 @@ export default defineComponent({
     display: flex;
     align-items: center;
 }
+.avatar-group.is-clickable {
+    cursor: pointer;
+}
+.avatar-group.is-clickable * {
+    cursor: pointer !important;
+}
 .avatar-group.layout-stack > * {
     margin-left: 0;
 }
@@ -89,8 +125,8 @@ export default defineComponent({
 .avatar-group.layout-triangle {
     position: relative;
     display: inline-block;
-    width: calc(var(--va-size) * 1.55); /* Increased for less overlap */
-    height: calc(var(--va-size) * 1.35);
+    width: calc(var(--va-size) * 1.8); /* Wider for better visibility of back avatars */
+    height: calc(var(--va-size) * 1.45);
 }
 .avatar-group.layout-triangle > * {
     position: absolute !important;

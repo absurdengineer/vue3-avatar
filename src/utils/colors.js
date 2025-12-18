@@ -204,11 +204,16 @@ export function getAvatarColors(name, useLegacyColors = false) {
   // Modern logic
   const darkColor = darkColors[ascii % darkColors.length];
   const lightColor = lightColors[ascii % lightColors.length];
+  
+  // Secondary color for gradients
+  const secondaryColor = darkColors[(ascii + 5) % darkColors.length];
+  const gradient = `linear-gradient(135deg, ${darkColor} 0%, ${secondaryColor} 100%)`;
 
   // Default: Dark Background, Light Text
   return {
     background: darkColor,
     color: lightColor,
+    gradient: gradient,
     // We also expose the pair if needed for inversion
     light: lightColor,
     dark: darkColor
