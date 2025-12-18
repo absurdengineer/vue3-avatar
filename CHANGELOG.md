@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.1] - 2025-12-18
+
+### Fixed
+
+- Fixed broken Markdown table syntax in the README "Events" section.
+
 ## [4.0.0] - 2025-12-18
 
 ### Added

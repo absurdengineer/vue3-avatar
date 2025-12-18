@@ -1,6 +1,6 @@
 {
   "name": "vue3-avatar",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "",
   "main": "dist/avatar.ssr.js",
   "browser": "dist/avatar.esm.js",
@@ -60,5 +60,8 @@
     "user-avatar",
     "vuejs"
   ],
-  "repository": "https://github.com/absurdengineer/vue3-avatar"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/absurdengineer/vue3-avatar.git"
+  }
 }

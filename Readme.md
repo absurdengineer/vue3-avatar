@@ -107,10 +107,10 @@ After importing the component, you can use it in your templates as:
 
 ## Events
 
-| Event | Arguments | Description |
-|Data |---|---|
-| `error` | `event` | Emitted when `imageSrc` fails to load |
-| `activate` | `event` | Emitted when `interactive` is true and user clicks or presses Enter/Space |
+| Event      | Arguments | Description                                                               |
+| ---------- | --------- | ------------------------------------------------------------------------- |
+| `error`    | `event`   | Emitted when `imageSrc` fails to load                                     |
+| `activate` | `event`   | Emitted when `interactive` is true and user clicks or presses Enter/Space |
 
 ## Slots
 
