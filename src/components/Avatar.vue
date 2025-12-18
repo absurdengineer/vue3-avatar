@@ -2,9 +2,11 @@
   <div
     class="container"
     :style="rootStyle"
-    :role="interactive ? 'button' : 'img'"
-    :tabindex="interactive ? 0 : undefined"
+    :role="isClickable ? 'button' : 'img'"
+    :tabindex="isClickable ? 0 : undefined"
     :aria-label="accessibleLabel"
+    :title="name"
+    :class="{ 'is-clickable': isClickable }"
     @click="onActivate"
     @keydown.enter.prevent="onActivate"
     @keydown.space.prevent="onActivate"
@@ -15,6 +17,7 @@
       :width="size"
       v-if="showImage()"
       :src="imageSrc"
+      loading="lazy"
       alt=""
       @error="onImageError"
     />
@@ -77,6 +80,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  shape: {
+    type: String,
+    validator: (value) => ['circle', 'square', 'squircle', 'hexagon'].includes(value),
+  },
   imageSrc: {
     type: String,
   },
@@ -126,11 +133,35 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  gradient: {
+    type: Boolean,
+    default: false,
+  },
+  pointer: {
+    type: Boolean,
+    default: false,
+  },
+  onClick: {
+    type: Function,
+    default: null,
+  },
 });
 
 const emit = defineEmits(['error', 'activate']);
-
 const imageError = ref(false);
+
+const isClickable = computed(() => {
+  return props.pointer || props.interactive || typeof props.onClick === 'function';
+});
+
+function onActivate(event) {
+  if (typeof props.onClick === 'function') {
+    props.onClick(event);
+  }
+  if (props.interactive) {
+    emit('activate', event);
+  }
+}
 
 const computedColors = computed(() => {
   return getAvatarColors(props.name, props.useLegacyColors);
@@ -144,6 +175,7 @@ const displayBackground = computed(() => {
   if (props.background) return props.background;
   const colors = computedColors.value;
   if (props.useLegacyColors) return colors.background;
+  if (props.gradient && colors.gradient) return colors.gradient;
   return props.dark ? colors.dark : colors.light;
 });
 
@@ -197,7 +229,8 @@ const statusStyle = computed(() => {
 const imageStyle = computed(() => {
   const defaultImageStyle = {
     display: props.inline ? 'inline-flex' : 'flex',
-    borderRadius: props.rounded ? '50%' : '0',
+    borderRadius: shapeStyle.value.borderRadius,
+    clipPath: shapeStyle.value.clipPath,
     margin: 0,
     padding: 0,
     alignItems: 'center',
@@ -215,10 +248,24 @@ const avatarStyle = computed(() => {
     fontSize: fontSize.value + 'px',
     background: displayBackground.value,
     display: props.inline && 'inline-flex',
-    borderRadius: props.rounded && '50%',
+    borderRadius: shapeStyle.value.borderRadius,
+    clipPath: shapeStyle.value.clipPath,
     border: props.border && `${props.size / 20}px solid ${displayBorderColor.value}`,
   };
   return Object.assign({}, defaultAvatarStyle, props.customAvatarStyle);
+});
+
+const shapeStyle = computed(() => {
+  const shape = props.shape || (props.rounded ? 'circle' : 'square');
+  
+  if (shape === 'square') return { borderRadius: '0' };
+  if (shape === 'circle') return { borderRadius: '50%' };
+  if (shape === 'squircle') return { borderRadius: '25%' }; 
+  if (shape === 'hexagon') return { 
+    borderRadius: '0',
+    clipPath: 'polygon(25% 5%, 75% 5%, 95% 50%, 75% 95%, 25% 95%, 5% 50%)'
+  };
+  return { borderRadius: '0' };
 });
 
 const rootStyle = computed(() => {
@@ -227,7 +274,8 @@ const rootStyle = computed(() => {
     '--va-bg': displayBackground.value,
     '--va-color': displayColor.value,
     '--va-border-color': displayBorderColor.value,
-    '--va-radius': props.rounded ? '50%' : '0',
+    '--va-radius': shapeStyle.value.borderRadius,
+    '--va-clip-path': shapeStyle.value.clipPath || 'none',
     '--va-font-size': `${fontSize.value}px`,
   };
 });
@@ -249,11 +297,7 @@ function showImage() {
   return props.imageSrc && !imageError.value;
 }
 
-function onActivate(event) {
-  if (props.interactive) {
-    emit('activate', event);
-  }
-}
+
 </script>
 
 <style scoped>
@@ -281,6 +325,10 @@ function onActivate(event) {
 }
 .container {
   position:relative;
+}
+.container.is-clickable,
+.container.is-clickable * {
+  cursor: pointer !important;
 }
 .status-indicator {
   position: absolute;
