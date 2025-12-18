@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AvatarGroup from '../src/components/AvatarGroup.vue'
+import Avatar from '../src/components/Avatar.vue'
 import { h } from 'vue'
 
 describe('AvatarGroup Component', () => {
@@ -39,5 +40,26 @@ describe('AvatarGroup Component', () => {
       props: { overlap: 20 }
     })
     expect(wrapper.attributes('style')).toContain('--va-group-overlap: -20px')
+  })
+
+  it('passes props to child components', () => {
+    const wrapper = mount(AvatarGroup, {
+      props: { size: 60, borderColor: 'red' },
+      slots: {
+        default: () => [
+          h(Avatar, { name: 'John Doe' }),
+        ]
+      }
+    })
+    const avatar = wrapper.findComponent(Avatar)
+    expect(avatar.props('size')).toBe(60)
+    expect(avatar.props('borderColor')).toBe('red')
+  })
+
+  it('applies triangle layout', () => {
+    const wrapper = mount(AvatarGroup, {
+      props: { layout: 'triangle' }
+    })
+    expect(wrapper.classes()).toContain('layout-triangle')
   })
 })

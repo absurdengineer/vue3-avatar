@@ -1,6 +1,6 @@
 # vue3-avatar
 
-A user avatar component for vue3. By default it uses light colors for Text and dark colors for Background.
+A user avatar component for vue3. By default it uses light colors for Background and dark colors for Text.
 
 This component is highly inspired from [vue-avatar](https://github.com/eliep/vue-avatar).
 
@@ -22,7 +22,8 @@ This component can now also show an image by setting the `imageSrc` prop. If an 
 
 ## Preview
 
-![image description](/img/preview.png)
+![single avatar preview](/img/preview_single.png)
+![avatar group preview](/img/preview_group.png)
 
 ## Installation
 
@@ -80,8 +81,7 @@ After importing the component, you can use it in your templates as:
 | color       | false    | String  | white   | Text color for Avatar letters                                |
 | background  | false    | String  | navy    | Background color for Avatar                                  |
 | size        | false    | Number  | 40      | Pixel size for Avatar (Same Height and Width)                |
-| light       | false    | Boolean | false   | **NEW** Use light background with dark text (replaces inverted) |
-| inverted    | false    | Boolean | false   | **@deprecated** Use `light` instead                          |
+| dark        | false    | Boolean | false   | Use dark background with light text                          |
 | inline      | false    | Boolean | false   | To create inline Avatar                                      |
 | rounded     | false    | Boolean | true    | Square or Rounded                                            |
 | imageSrc    | false    | String  | null    | To show an Image                                             |
@@ -94,6 +94,7 @@ After importing the component, you can use it in your templates as:
 | customAvatarStyle  | false    | Object | {}   | A custom style object to personalize the avatar apperance |
 | customStatusStyle  | false    | Object | {}   | A custom style object to personalize the status indicator |
 | useLegacyColors | false | Boolean | false | **@deprecated** Use original vue-avatar color palette for backwards compatibility |
+| useTextColorForBorder | false | Boolean | false | Use the text color for the border |
 
 ## Events
 
@@ -140,6 +141,18 @@ You can group multiple avatars together with `AvatarGroup`.
 - `overlap`: (Number) Overlap size in pixels (default 10).
 - `borderColor`: (String) Border color for separators (default 'white').
 - `size`: (Number) Size for the overflow badge (default 40).
+- `layout`: (String) Layout of the avatars. Can be `stack` (default) or `triangle`.
+
+You can also pass props to individual `Avatar` components within the group. For example, you can set the `status` of each avatar.
+
+```html
+<AvatarGroup :max="3">
+  <Avatar name="Tony Stark" status="online" />
+  <Avatar name="Bruce Banner" status="away" />
+  <Avatar name="Steve Rogers" status="offline" />
+  <Avatar name="Natasha Romanoff" />
+</AvatarGroup>
+```
 
 ## Accessibility
 
@@ -171,7 +184,7 @@ By default, the component uses a modern color palette with light colors for text
 
 v4 is mostly backward compatible. Key changes:
 1.  **Deprecated:** `useLegacyColors` triggers a console warning.
-2.  **Deprecated:** `inverted` prop is deprecated in favor of `light`.
+2.  **Removed:** `inverted` prop is removed. The default theme is now light. Use the `dark` prop to enable the dark theme.
 3.  **Accessibility:** The DOM structure has `role` attributes and improved labels. Ensure your tests don't rely on specific internal DOM structure if not needed.
 4.  **Strict Initials:** The initials algorithm is now frozen and formalized.
 

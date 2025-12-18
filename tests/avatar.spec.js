@@ -188,41 +188,38 @@ describe('Avatar Component', () => {
     expect(wrapper.find('.overlay-badge').exists()).toBe(true)
   })
   
-  it('uses light mode when light prop is true', () => {
+  it('uses dark mode when dark prop is true', () => {
     const wrapper = mount(Avatar, {
-      props: { name: 'John Doe', light: true }
+      props: { name: 'John Doe', dark: true }
     })
-    // In light mode: light color is used for bg (or inverted logic)
-    // Actually:
-    // isLight = true
-    // displayBackground = colors.light
-    // displayColor = colors.dark
-    // Default (Dark mode): BG=Dark, Color=Light
-    // Light mode: BG=Light, Color=Dark
-    
-    // We can't easily assert exact colors without mocking, but we can assume
-    // the style attribute reflects the inverted colors.
-    
-    // Let's just check that it renders without error and we could check that it is different from default?
     const wrapperDefault = mount(Avatar, { props: { name: 'John Doe' } });
     
-    const styleLight = wrapper.find('.container').attributes('style');
+    const styleDark = wrapper.find('.container').attributes('style');
     const styleDefault = wrapperDefault.find('.container').attributes('style');
     
-    expect(styleLight).not.toBe(styleDefault);
+    expect(styleDark).not.toBe(styleDefault);
   })
 
-  it('uses light mode when inverted prop is true (legacy alias)', () => {
+  it('uses light mode when dark prop is false', () => {
     const wrapper = mount(Avatar, {
-      props: { name: 'John Doe', inverted: true }
+      props: { name: 'John Doe', dark: false }
     })
-    const wrapperLight = mount(Avatar, {
-      props: { name: 'John Doe', light: true }
+    const wrapperDefault = mount(Avatar, { props: { name: 'John Doe' } });
+    
+    const styleDarkFalse = wrapper.find('.container').attributes('style');
+    const styleDefault = wrapperDefault.find('.container').attributes('style');
+    
+    expect(styleDarkFalse).toBe(styleDefault);
+  })
+
+  it('uses text color for border when useTextColorForBorder is true', () => {
+    const wrapper = mount(Avatar, {
+      props: { name: 'John Doe', useTextColorForBorder: true }
     })
-    
-    const styleInverted = wrapper.find('.container').attributes('style');
-    const styleLight = wrapperLight.find('.container').attributes('style');
-    
-    expect(styleInverted).toBe(styleLight);
+    const container = wrapper.find('.container')
+    const style = container.attributes('style')
+    const color = style.match(/--va-color:\s*(.*?);/)[1]
+    const borderColor = style.match(/--va-border-color:\s*(.*?);/)[1]
+    expect(borderColor).toBe(color)
   })
 })
