@@ -1,5 +1,5 @@
 <script>
-import { h, defineComponent, Fragment, Comment, Text } from 'vue';
+import { h, defineComponent, Fragment, Comment, Text, cloneVNode } from 'vue';
 
 export default defineComponent({
   name: 'AvatarGroup',
@@ -8,6 +8,11 @@ export default defineComponent({
     overlap: { type: Number, default: 10 },
     borderColor: { type: String, default: 'white' },
     size: { type: Number, default: 40 },
+    layout: {
+      type: String,
+      default: 'stack', // stack | triangle
+      validator: (value) => ['stack', 'triangle'].includes(value),
+    },
   },
   setup(props, { slots }) {
     
@@ -48,13 +53,21 @@ export default defineComponent({
          }
       }, `+${overflowCount}`) : null;
 
+      const visibleWithProps = visible.map(child => {
+        return cloneVNode(child, {
+          size: props.size,
+          borderColor: props.borderColor,
+        });
+      });
+
       return h('div', { 
-          class: 'avatar-group',
+          class: ['avatar-group', `layout-${props.layout}`],
           style: {
              '--va-group-overlap': `-${props.overlap}px`,
+             '--va-size': `${props.size}px`,
           }
       }, [
-          ...visible,
+          ...visibleWithProps,
           overflowBadge
       ]);
     };
@@ -67,11 +80,36 @@ export default defineComponent({
     display: flex;
     align-items: center;
 }
-.avatar-group > * {
+.avatar-group.layout-stack > * {
     margin-left: 0;
 }
-.avatar-group > * + * {
+.avatar-group.layout-stack > * + * {
     margin-left: var(--va-group-overlap);
+}
+.avatar-group.layout-triangle {
+    position: relative;
+    display: inline-block;
+    width: calc(var(--va-size) * 1.55); /* Increased for less overlap */
+    height: calc(var(--va-size) * 1.35);
+}
+.avatar-group.layout-triangle > * {
+    position: absolute !important;
+}
+.avatar-group.layout-triangle > *:nth-child(1) {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10 !important;
+}
+.avatar-group.layout-triangle > *:nth-child(2) {
+    bottom: 0;
+    left: 0;
+    z-index: 5 !important;
+}
+.avatar-group.layout-triangle > *:nth-child(3) {
+    bottom: 0;
+    right: 0;
+    z-index: 1 !important;
 }
 .avatar-overflow {
     display: flex;

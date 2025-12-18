@@ -1,96 +1,208 @@
 <script>
 import Avatar from "@/components/Avatar.vue";
+import AvatarGroup from "@/components/AvatarGroup.vue";
 import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "ServeDev",
   components: {
     Avatar,
+    AvatarGroup,
   },
 });
 </script>
 
 <template>
   <div id="app">
-    <div style="display: flex; gap: 10px">
-      <avatar
-        :size="80"
-        name="Mohammad Dilshad Alam"
-        :inline="false"
-        borderColor="black"
-      />
-      <avatar
-        :size="80"
-        name="Mohammad Dilshad Alam"
-        :inline="false"
-        borderColor="black"
-        :useLegacyColors="true"
-      />
-     <div style="display: inline-block;">
-      <avatar
-        name="Mohammad Dilshad Alam"
-        :size="80"
-        imageSrc="https://img.freepik.com/vektoren-kostenlos/geschaeftsmann-charakter-avatar-isoliert_24877-60111.jpg"
-        :inline="false"
-        :rounded="true"
-        borderColor="black"
-        status="online"
-      />
-     </div>
-     <div style="display: inline-block;">
-      <avatar
-        name="Mohammad Dilshad Alam"
-        :size="80"
-        imageSrc="https://marketplace.canva.com/EAFltIh8PKg/1/0/1600w/canva-cute-anime-cartoon-illustration-girl-avatar-J7nVyTlhTAE.jpg"
-        :inline="false"
-        :rounded="true"
-        borderColor="black"
-        status="away"
-        :sameBorder="true"
-      />
-    </div>
-      <div style="display: inline-block;">
-        <avatar
-          name="Mohammad Dilshad Alam"
-          :size="80"
-          imageSrc="https://play-lh.googleusercontent.com/7Ak4Ye7wNUtheIvSKnVgGL_OIZWjGPZNV6TP_3XLxHC-sDHLSE45aDg41dFNmL5COA=w240-h480-rw"
-          :inline="false"
-          :rounded="true"
-          borderColor="black"
-          status="offline"
-        />
+    <div class="gallery-container">
+      
+      <!-- Section 1: Singles -->
+      <div class="section-block">
+        <h2 class="section-title">Single Avatars</h2>
+        <div class="row">
+          <div class="item">
+            <avatar name="Jane Doe" />
+            <span>Default</span>
+          </div>
+          <div class="item">
+            <avatar name="Jane Doe" :dark="true" />
+            <span>Dark</span>
+          </div>
+          <div class="item">
+            <avatar name="Jane Doe" background="linear-gradient(to right, #ff8a00, #e52e71)" color="white" />
+            <span>Custom</span>
+          </div>
+          <div class="item">
+            <avatar name="Jane Doe" :size="40" :rounded="false" />
+            <span>Square</span>
+          </div>
+          <div class="item">
+            <avatar name="Jane Doe" imageSrc="https://img.freepik.com/vektoren-kostenlos/geschaeftsmann-charakter-avatar-isoliert_24877-60111.jpg" />
+            <span>Image</span>
+          </div>
+          <div class="item">
+            <avatar name="John Doe Watsit" />
+            <span>3 Initials</span>
+          </div>
+           <div class="item">
+              <avatar name="Jane Doe" borderColor="black" />
+              <span>Border</span>
+          </div>
+           <div class="item">
+              <avatar name="Jane Doe" status="online" />
+              <span>Online</span>
+          </div>
+        </div>
       </div>
-      <div style="display: inline-block;">
-        <avatar
-        name="Mohammad Dilshad Alam"
-        :size="80"
-        imageSrc="https://imgs.search.brave.com/gkEV9yc54nx5w6v5dsRZjDvLxcWR_Q3vhrrXkz_DnXE/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS12ZWN0/b3IvYm95LXdpdGgt/aG9vZGllLXRoYXQt/c2F5cy1oZXMtYm95/Xzk2OTg2My0yMDY4/MDMuanBnP3NpemU9/NjI2JmV4dD1qcGc"
-        :inline="false"
-        :rounded="true"
-        borderColor="black"
-        status="busy"
-        :customAvatarStyle="{
-          height: '150px',
-          width:  '150px'
-        }"
-        :customStatusStyle="{
-          height: '60px',
-          width: '60px',
-        }"
-      />
+
+      <div class="divider"></div>
+
+      <!-- Section 2: Groups -->
+      <div class="section-block">
+        <h2 class="section-title">Avatar Groups</h2>
+        
+        <!-- Stack Sub-row -->
+        <h3 class="subsection-title">Stack Layout</h3>
+        <div class="row">
+          <div class="item group-item">
+            <avatar-group>
+              <avatar name="Jane Doe" />
+              <avatar name="John Smith" />
+              <avatar name="Peter Jones" />
+            </avatar-group>
+            <span>Stack</span>
+          </div>
+
+          <div class="item group-item">
+            <avatar-group :max="2">
+              <avatar name="Jane Doe" />
+              <avatar name="John Smith" />
+              <avatar name="Peter Jones" />
+            </avatar-group>
+            <span>Stack Max</span>
+          </div>
+        </div>
+
+        <!-- Triangle Sub-row -->
+        <h3 class="subsection-title">Triangle Layout</h3>
+        <div class="row">
+           <div class="item group-item">
+            <avatar-group layout="triangle">
+               <avatar name="Jane Doe" />
+               <avatar name="John Smith" />
+               <avatar name="Peter Jones" />
+            </avatar-group>
+            <span>Triangle</span>
+          </div>
+          
+          <div class="item group-item">
+            <avatar-group layout="triangle" :size="50">
+               <avatar name="Jane Doe" imageSrc="https://img.freepik.com/vektoren-kostenlos/geschaeftsmann-charakter-avatar-isoliert_24877-60111.jpg" />
+               <avatar name="Jane Doe" status="online"/>
+               <avatar name="Jane Doe" background="#007bff" />
+            </avatar-group>
+            <span>Tri-Mix</span>
+          </div>
+          
+          <div class="item group-item">
+            <avatar-group layout="triangle">
+               <avatar name="Jane Doe" status="online" />
+               <avatar name="John Smith" status="busy" />
+               <avatar name="Peter Jones" status="offline" />
+            </avatar-group>
+            <span>Tri-Stat</span>
+          </div>
+        
+          <div class="item group-item">
+             <avatar-group layout="triangle" :size="60">
+                 <avatar name="Jane Doe"  />
+                 <avatar name="John Smith" />
+                 <avatar name="Peter Jones" />
+            </avatar-group>
+            <span>Large</span>
+          </div>
+        </div>
       </div>
-      <div style="display: inline-block;">
-      <avatar
-        name="Mohammad Dilshad Alam"
-        imageSrc="https://marketplace.canva.com/EAFltIh8PKg/1/0/1600"
-        :inline="false"
-        :rounded="true"
-        :border="false"
-        status="busy"
-        :customAvatarStyle="{height: '150px', width: '150px', fontSize: '50px'}"
-        :customStatusStyle="{backgroundColor: 'purple', height: '30px', width: '50px'}"
-      />
-    </div>
+
     </div>
   </div>
 </template>
+
+<style>
+body {
+    background-color: white;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
+#app {
+  padding: 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+.gallery-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.section-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-end;
+}
+.divider {
+    height: 1px;
+    background-color: #eee;
+    width: 100%;
+    margin: 1rem 0;
+}
+.section-title {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0;
+    font-weight: 600;
+    opacity: 0.7;
+    align-self: flex-start;
+    width: 100%;
+    text-align: center;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+.subsection-title {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 1rem 0 0.5rem 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 80px;
+}
+.group-item {
+    min-width: 120px; 
+    margin-left: 1rem;
+    margin-right: 1rem;
+}
+.item span {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 500;
+}
+</style>

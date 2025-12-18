@@ -10,7 +10,9 @@ All notable changes to this project will be documented in this file.
   - Added `alt` prop for explicit image descriptions.
   - Improved default ARIA labels (e.g., "Avatar of [Name]", status inclusion).
 - **Components:**
-  - Added `AvatarGroup` component for displaying stacked avatars with an overflow counter.
+  - Added `AvatarGroup` component for displaying stacked or grouped avatars.
+    - Supports `stack` layout (horizontal overlap).
+    - Supports `triangle` layout (pyramid shape) with pyramid stacking order (Top > Bottom-Left > Bottom-Right).
 - **Styling:**
   - Added CSS variables on the root element (`--va-size`, `--va-bg`, `--va-color`, etc.) for easier theming.
   - Added `status` and `overlay` slots for advanced customization.

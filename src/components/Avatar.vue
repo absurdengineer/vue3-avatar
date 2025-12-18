@@ -65,14 +65,7 @@ const props = defineProps({
     type: Number,
     default: 40,
   },
-  light: {
-    type: Boolean,
-    default: false,
-  },
-  /**
-   * @deprecated Use `light` instead.
-   */
-  inverted: {
+  dark: {
     type: Boolean,
     default: false,
   },
@@ -129,6 +122,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  useTextColorForBorder: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['error', 'activate']);
@@ -143,22 +140,22 @@ const displayName = computed(() => {
   return getInitials(props.name);
 });
 
-const isLight = computed(() => {
-  return props.light || props.inverted;
-});
-
 const displayBackground = computed(() => {
   if (props.background) return props.background;
   const colors = computedColors.value;
   if (props.useLegacyColors) return colors.background;
-  return isLight.value ? colors.light : colors.dark;
+  return props.dark ? colors.dark : colors.light;
 });
 
 const displayColor = computed(() => {
   if (props.color) return props.color;
   const colors = computedColors.value;
   if (props.useLegacyColors) return colors.color;
-  return isLight.value ? colors.dark : colors.light;
+  return props.dark ? colors.light : colors.dark;
+});
+
+const displayBorderColor = computed(() => {
+  return props.useTextColorForBorder ? displayColor.value : props.borderColor;
 });
 
 const fontSize = computed(() => {
@@ -192,7 +189,7 @@ const statusStyle = computed(() => {
     height: `${props.size / 4}px`,
     width: `${props.size / 4}px`,
     backgroundColor: statusBackgroundColor.value,
-    border: `${props.size / 30}px solid ${props.sameBorder ? props.borderColor : 'white'}`,
+    border: `${props.size / 30}px solid ${props.sameBorder ? displayBorderColor.value : 'white'}`,
   };
   return Object.assign({}, defaultStatusStyle, props.customStatusStyle);
 });
@@ -205,7 +202,7 @@ const imageStyle = computed(() => {
     padding: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    border: props.border ? `${props.size / 20}px solid ${props.borderColor}` : 'none',
+    border: props.border ? `${props.size / 20}px solid ${displayBorderColor.value}` : 'none',
   };
   return Object.assign({}, defaultImageStyle, props.customAvatarStyle);
 });
@@ -219,7 +216,7 @@ const avatarStyle = computed(() => {
     background: displayBackground.value,
     display: props.inline && 'inline-flex',
     borderRadius: props.rounded && '50%',
-    border: props.border && `${props.size / 20}px solid ${props.borderColor}`,
+    border: props.border && `${props.size / 20}px solid ${displayBorderColor.value}`,
   };
   return Object.assign({}, defaultAvatarStyle, props.customAvatarStyle);
 });
@@ -229,7 +226,7 @@ const rootStyle = computed(() => {
     '--va-size': `${props.size}px`,
     '--va-bg': displayBackground.value,
     '--va-color': displayColor.value,
-    '--va-border-color': props.borderColor,
+    '--va-border-color': displayBorderColor.value,
     '--va-radius': props.rounded ? '50%' : '0',
     '--va-font-size': `${fontSize.value}px`,
   };
