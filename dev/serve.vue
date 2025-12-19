@@ -14,7 +14,15 @@ export default defineComponent({
       console.log("Avatar clicked!", event);
       alert("Avatar clicked callback working!");
     };
-    return { handleAvatarClick };
+    const handleOverflowClick = (hidden, all) => {
+      console.log("Overflow clicked!", { hidden, all });
+      alert(
+        `Hidden users: ${hidden.length}\nTotal users: ${
+          all.length
+        }\nNames: ${hidden.map((u) => u.name).join(", ")}`
+      );
+    };
+    return { handleAvatarClick, handleOverflowClick };
   },
 });
 </script>
@@ -22,140 +30,266 @@ export default defineComponent({
 <template>
   <div id="app">
     <div class="gallery-container">
-      <!-- Section 1: Singles -->
+      <!-- Section 1: Shapes & Base Styles (v4.0 Core) -->
       <div class="section-block">
-        <h2 class="section-title">Single Avatars</h2>
+        <h2 class="section-title">Shapes & Base Styles</h2>
         <div class="row">
+          <div class="item"><avatar name="Jane Doe" /><span>Default</span></div>
           <div class="item">
-            <avatar name="Jane Doe" />
-            <span>Default</span>
+            <avatar name="Jane Doe" :dark="true" /><span>Dark</span>
           </div>
           <div class="item">
-            <avatar name="Jane Doe" :dark="true" />
-            <span>Dark</span>
+            <avatar name="Jane Doe" :gradient="true" color="white" /><span
+              >Gradient</span
+            >
           </div>
           <div class="item">
-            <avatar name="Jane Doe" :gradient="true" color="white" />
-            <span>Gradient</span>
+            <avatar name="Jane Doe" :rounded="false" /><span>Square</span>
           </div>
           <div class="item">
-            <avatar name="Jane Doe" shape="squircle" />
-            <span>Squircle</span>
+            <avatar name="Jane Doe" background="#007bff" /><span
+              >Custom BG</span
+            >
           </div>
           <div class="item">
-            <avatar name="Jane Doe" shape="hexagon" />
-            <span>Hexagon</span>
+            <avatar name="John Doe Watsit" /><span>3 Initials</span>
           </div>
           <div class="item">
-            <avatar name="Jane Doe" :size="40" :rounded="false" />
-            <span>Square</span>
+            <avatar name="Jane Doe" shape="squircle" /><span>Squircle</span>
+          </div>
+          <div class="item">
+            <avatar name="Jane Doe" shape="hexagon" /><span>Hexagon</span>
           </div>
         </div>
         <div class="row">
           <div class="item">
-            <avatar
-              name="Jane Doe"
-              imageSrc="https://img.freepik.com/vektoren-kostenlos/geschaeftsmann-charakter-avatar-isoliert_24877-60111.jpg"
-            />
-            <span>Image</span>
+            <avatar name="Jane Doe" :border="true" borderColor="#2ecc71" /><span
+              >Custom Border</span
+            >
           </div>
           <div class="item">
-            <avatar name="John Doe Watsit" />
-            <span>3 Initials</span>
+            <avatar name="Hover Me" :pointer="true" /><span>Pointer</span>
           </div>
           <div class="item">
-            <avatar name="Jane Doe" borderColor="black" />
-            <span>Border</span>
-          </div>
-          <div class="item">
-            <avatar name="Jane Doe" status="online" />
-            <span>Online</span>
-          </div>
-          <div class="item">
-            <avatar name="Hover Me" :pointer="true" />
-            <span>Pointer</span>
-          </div>
-          <div class="item">
-            <avatar name="Click Me" :onClick="handleAvatarClick" />
-            <span>Callback</span>
+            <avatar name="Click Me" :onClick="handleAvatarClick" /><span
+              >Interactive</span
+            >
           </div>
         </div>
       </div>
 
       <div class="divider"></div>
 
-      <!-- Section 2: Groups -->
+      <!-- Section 2: Status & Presence -->
       <div class="section-block">
-        <h2 class="section-title">Avatar Groups</h2>
-
-        <!-- Stack Sub-row -->
-        <h3 class="subsection-title">Stack Layout</h3>
+        <h2 class="section-title">Status & Presence (New Positions in v4.1)</h2>
         <div class="row">
-          <div class="item group-item">
-            <avatar-group>
-              <avatar name="Jane Doe" />
-              <avatar name="John Smith" />
-              <avatar name="Peter Jones" />
-            </avatar-group>
-            <span>Stack</span>
+          <div class="item">
+            <avatar name="John" status="online" /><span>Online</span>
           </div>
-
-          <div class="item group-item">
-            <avatar-group :max="2">
-              <avatar name="Jane Doe" />
-              <avatar name="John Smith" />
-              <avatar name="Peter Jones" />
-              <avatar name="Pete Carlton" />
-            </avatar-group>
-            <span>Stack Max</span>
+          <div class="item">
+            <avatar name="John" status="away" /><span>Away</span>
+          </div>
+          <div class="item">
+            <avatar name="John" status="busy" /><span>Busy</span>
+          </div>
+          <div class="item">
+            <avatar name="John" status="offline" /><span>Offline</span>
+          </div>
+          <div class="item">
+            <avatar
+              name="John"
+              status="online"
+              status-position="top-right"
+            /><span>Top-Right</span>
+          </div>
+          <div class="item">
+            <avatar
+              name="John"
+              status="online"
+              status-position="top-left"
+            /><span>Top-Left</span>
+          </div>
+          <div class="item">
+            <avatar
+              name="John"
+              status="online"
+              status-position="bottom-left"
+            /><span>Bottom-Left</span>
+          </div>
+          <div class="item">
+            <avatar name="John" status="online">
+              <template #status
+                ><div
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    background: blue;
+                  "
+                ></div
+              ></template>
+            </avatar>
+            <span>Status Slot</span>
           </div>
         </div>
+      </div>
 
-        <!-- Triangle Sub-row -->
-        <h3 class="subsection-title">Triangle Layout</h3>
+      <div class="divider"></div>
+
+      <!-- Section 3: PixelGen Themes (v4.1) -->
+      <div class="section-block">
+        <h2 class="section-title">✨ PixelGen Themes</h2>
+        <div class="row">
+          <div class="item">
+            <avatar
+              name="Alice"
+              variant="pixel"
+              pixel-theme="earth"
+              :dark="true"
+            /><span>Earth</span>
+          </div>
+          <div class="item">
+            <avatar name="Bob" variant="pixel" pixel-theme="neon" /><span
+              >Neon</span
+            >
+          </div>
+          <div class="item">
+            <avatar name="Charlie" variant="pixel" pixel-theme="ocean" /><span
+              >Ocean</span
+            >
+          </div>
+          <div class="item">
+            <avatar name="David" variant="pixel" pixel-theme="forest" /><span
+              >Forest</span
+            >
+          </div>
+          <div class="item">
+            <avatar name="Eve" variant="pixel" pixel-theme="sunset" /><span
+              >Sunset</span
+            >
+          </div>
+          <div class="item">
+            <avatar name="Frank" variant="pixel" pixel-theme="midnight" /><span
+              >Midnight</span
+            >
+          </div>
+          <div class="item">
+            <avatar name="Grace" variant="pixel" pixel-theme="candy" /><span
+              >Candy</span
+            >
+          </div>
+          <div class="item">
+            <avatar name="Heidi" variant="pixel" pixel-theme="retro" /><span
+              >Retro</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Section 4: Auto-Contrast & Images -->
+      <div class="section-block">
+        <h2 class="section-title">Auto-Contrast & Images</h2>
+        <div class="row">
+          <div class="item">
+            <avatar
+              name="Light"
+              background="#f1c40f"
+              :auto-contrast="true"
+            /><span>Auto Black</span>
+          </div>
+          <div class="item">
+            <avatar
+              name="Dark"
+              background="#2c3e50"
+              :auto-contrast="true"
+            /><span>Auto White</span>
+          </div>
+          <div class="item">
+            <avatar
+              name="User"
+              imageSrc="https://img.freepik.com/vektoren-kostenlos/geschaeftsmann-charakter-avatar-isoliert_24877-60111.jpg"
+            />
+            <span>Standard Image</span>
+          </div>
+          <div class="item">
+            <avatar
+              name="User"
+              imageSrc="https://img.freepik.com/vektoren-kostenlos/geschaeftsmann-charakter-avatar-isoliert_24877-60111.jpg"
+              :transition="true"
+            />
+            <span>Image Fade-in</span>
+          </div>
+          <div class="item">
+            <avatar name="" :size="40">
+              <template #placeholder="{ style }"
+                ><div
+                  :style="{
+                    ...style,
+                    background: '#f5f5f5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }"
+                >
+                  👤
+                </div></template
+              >
+            </avatar>
+            <span>Placeholder Slot</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Section 5: Avatar Groups -->
+      <div class="section-block">
+        <h2 class="section-title">Interactive Avatar Groups</h2>
         <div class="row">
           <div class="item group-item">
+            <avatar-group :max="3">
+              <avatar name="Alice" /><avatar name="Bob" /><avatar
+                name="Charlie"
+              /><avatar name="David" />
+            </avatar-group>
+            <span>Stack (Max 3)</span>
+          </div>
+          <div class="item group-item">
+            <avatar-group @overflow-click="handleOverflowClick" :max="2">
+              <avatar name="Alice" variant="pixel" /><avatar
+                name="Bob"
+                variant="pixel"
+              /><avatar name="Charlie" variant="pixel" />
+            </avatar-group>
+            <span>Interactive +N</span>
+          </div>
+          <div class="item group-item">
             <avatar-group layout="triangle">
-              <avatar name="Jane Doe" />
-              <avatar name="John Smith" />
-              <avatar name="Peter Jones" />
+              <avatar name="Alice" /><avatar name="Bob" /><avatar
+                name="Charlie"
+              />
             </avatar-group>
             <span>Triangle</span>
           </div>
-
           <div class="item group-item">
-            <avatar-group
-              layout="triangle"
-              :size="50"
-              :onClick="handleAvatarClick"
-            >
-              <avatar
-                name="Jane Doe"
-                imageSrc="https://img.freepik.com/vektoren-kostenlos/geschaeftsmann-charakter-avatar-isoliert_24877-60111.jpg"
-              />
-              <avatar name="Jane Doe" status="online" />
-              <avatar name="Jane Doe" background="#007bff" />
-              <avatar name="Jane Doe" background="#007bff" />
+            <avatar-group layout="triangle" :size="50">
+              <avatar name="Alice" variant="pixel" pixel-theme="neon" />
+              <avatar name="Bob" variant="pixel" pixel-theme="ocean" />
+              <avatar name="Charlie" variant="pixel" pixel-theme="sunset" />
             </avatar-group>
-            <span>Tri-Mix (Clickable)</span>
+            <span>Triangle Pixel</span>
           </div>
-
           <div class="item group-item">
-            <avatar-group layout="triangle">
-              <avatar name="Jane Doe" status="online" />
-              <avatar name="John Smith" status="busy" />
-              <avatar name="Peter Jones" status="offline" />
+            <avatar-group>
+              <avatar name="S" status="online" /><avatar
+                name="B"
+                status="busy"
+              /><avatar name="O" status="offline" />
             </avatar-group>
-            <span>Tri-Stat</span>
-          </div>
-
-          <div class="item group-item">
-            <avatar-group layout="triangle" :size="60">
-              <avatar name="Jane Doe" />
-              <avatar name="John Smith" />
-              <avatar name="Peter Jones" />
-            </avatar-group>
-            <span>Large</span>
+            <span>Status Stack</span>
           </div>
         </div>
       </div>
@@ -175,7 +309,7 @@ body {
 }
 #app {
   padding: 2rem;
-  max-width: 1200px;
+  max-width: 900px;
   width: 100%;
   margin: 0 auto;
 }
