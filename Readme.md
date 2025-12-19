@@ -22,13 +22,25 @@ This component can now also show an image by setting the `imageSrc` prop. If an 
 
 ## Previews
 
-### Single Avatars
+### Shapes & Base Styles
 
-![single avatar preview](/img/preview_single.png)
+![shapes and base styles](/img/shapes_base.png)
 
-### Avatar Group
+### Status & Presence
 
-![avatar group preview](/img/preview_group.png)
+![status and presence](/img/status_presence.png)
+
+### PixelGen Themes
+
+![pixelgen themes](/img/pixelgen.png)
+
+### Auto-Contrast & Images
+
+![auto contrast and images](/img/auto_contrast.png)
+
+### Interactive Avatar Groups
+
+![avatar groups](/img/avatar_groups.png)
 
 ## Installation
 
@@ -56,20 +68,27 @@ export default {
 };
 ```
 
-**For Global Registration**
+**For Global Registration (with optional defaults)**
 
 Update main.js
 
 ```javascript
 import { createApp } from "vue";
 import App from "./App.vue";
-// ...
 import Avatar from "vue3-avatar";
 
-createApp(App).use(Avatar);
-// or
-// createApp(App).component("avatar", Avatar)
-// ...
+const app = createApp(App);
+
+// Configure global defaults (Optional)
+app.use(Avatar, {
+  defaults: {
+    size: 50,
+    autoContrast: true,
+    transition: true,
+    loading: "lazy",
+    shape: "circle",
+  },
+});
 ```
 
 After importing the component, you can use it in your templates as:
@@ -78,46 +97,102 @@ After importing the component, you can use it in your templates as:
 <avatar name="John Doe"></avatar>
 ```
 
+## Nuxt.js Support
+
+vue3-avatar v4.1 is fully SSR-safe and optimized for Nuxt.js 3+.
+
+### 1. Installation in Nuxt
+
+Create a plugin file `plugins/avatar.ts`:
+
+```typescript
+import { defineNuxtPlugin } from "#app";
+import Avatar from "vue3-avatar";
+
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.vueApp.use(Avatar, {
+    defaults: {
+      size: 40,
+      autoContrast: true,
+    },
+  });
+});
+```
+
+### 2. Standard Scoped Slot for NuxtImg
+
+Use the `#image` slot to integrate with custom image components like `<NuxtImg>` for better performance and automatic optimization.
+
+```html
+<template>
+  <Avatar name="John Doe" image-src="/profile.jpg">
+    <template #image="{ src, alt, size, style }">
+      <NuxtImg
+        :src="src"
+        :alt="alt"
+        :width="size"
+        :height="size"
+        :style="style"
+        loading="lazy"
+      />
+    </template>
+  </Avatar>
+</template>
+```
+
+### 3. SSR-Safe Deterministic Colors
+
+Colors and Pixel patterns are generated deterministically based on the `name` prop, ensuring no hydration mismatches between server-side rendering and client-side activation.
+
 ## Props
 
-| Property              | Required | Type     | Default | Description                                                                       |
-| --------------------- | -------- | -------- | ------- | --------------------------------------------------------------------------------- |
-| name                  | true     | String   | -       | Name to compute Avatar letters                                                    |
-| color                 | false    | String   | white   | Text color for Avatar letters                                                     |
-| background            | false    | String   | navy    | Background color for Avatar                                                       |
-| size                  | false    | Number   | 40      | Pixel size for Avatar (Same Height and Width)                                     |
-| dark                  | false    | Boolean  | false   | Use dark background with light text                                               |
-| inline                | false    | Boolean  | false   | To create inline Avatar                                                           |
-| rounded               | false    | Boolean  | true    | Square or Rounded                                                                 |
-| imageSrc              | false    | String   | null    | To show an Image                                                                  |
-| alt                   | false    | String   | derived | **NEW** Alt text for accessibility                                                |
-| border                | false    | Boolean  | true    | Show or Hide the border                                                           |
-| borderColor           | false    | String   | white   | Border color for avatar                                                           |
-| status                | false    | String   | null    | To set user status as "online", "away", "offline", or "busy"                      |
-| sameBorder            | false    | Boolean  | false   | To have same border in Avatar as well as Status Indicator                         |
-| interactive           | false    | Boolean  | false   | **NEW** Enables keyboard interaction and role="button"                            |
-| customAvatarStyle     | false    | Object   | {}      | A custom style object to personalize the avatar apperance                         |
-| customStatusStyle     | false    | Object   | {}      | A custom style object to personalize the status indicator                         |
-| useLegacyColors       | false    | Boolean  | false   | **@deprecated** Use original vue-avatar color palette for backwards compatibility |
-| useTextColorForBorder | false    | Boolean  | false   | Use the text color for the border                                                 |
-| gradient              | false    | Boolean  | false   | **NEW** Use name-based linear gradients for background                            |
-| shape                 | false    | String   | circle  | **NEW** Avatar shape: `circle`, `square`, `squircle`, `hexagon`                   |
-| pointer               | false    | Boolean  | false   | **NEW** If true, applies `cursor: pointer` even without callback                  |
-| onClick               | false    | Function | null    | **NEW** Native click callback. Also enables `pointer` cursor.                     |
+| Property              | Required | Type     | Default      | Description                                                                        |
+| --------------------- | -------- | -------- | ------------ | ---------------------------------------------------------------------------------- |
+| name                  | true     | String   | -            | Name to compute Avatar letters                                                     |
+| color                 | false    | String   | white        | Text color for Avatar letters                                                      |
+| background            | false    | String   | navy         | Background color for Avatar                                                        |
+| size                  | false    | Number   | 40           | Pixel size for Avatar (Same Height and Width)                                      |
+| dark                  | false    | Boolean  | false        | Use dark background with light text                                                |
+| inline                | false    | Boolean  | false        | To create inline Avatar                                                            |
+| rounded               | false    | Boolean  | true         | Square or Rounded                                                                  |
+| imageSrc              | false    | String   | null         | To show an Image                                                                   |
+| loading               | false    | String   | lazy         | **NEW (v4.1)** Native image loading: `lazy` \| `eager`                             |
+| transition            | false    | Boolean  | true         | **NEW (v4.1)** Enable fade-in transition when image loads                          |
+| alt                   | false    | String   | derived      | Alt text for accessibility                                                         |
+| border                | false    | Boolean  | true         | Show or Hide the border                                                            |
+| borderColor           | false    | String   | white        | Border color for avatar                                                            |
+| status                | false    | String   | null         | To set user status as "online", "away", "offline", or "busy"                       |
+| statusPosition        | false    | String   | bottom-right | **NEW (v4.1)** Position: `top-right`, `top-left`, `bottom-right`, `bottom-left`    |
+| sameBorder            | false    | Boolean  | false        | To have same border in Avatar as well as Status Indicator                          |
+| interactive           | false    | Boolean  | false        | Enables keyboard interaction and role="button"                                     |
+| autoContrast          | false    | Boolean  | false        | **NEW (v4.1)** Automatically choose white/black text based on background luminance |
+| variant               | false    | String   | initials     | **NEW (v4.1)** Avatar type: `initials` \| `pixel`                                  |
+| pixelTheme            | false    | String   | earth        | **NEW (v4.1)** Pixel art theme (see below)                                         |
+| customAvatarStyle     | false    | Object   | {}           | A custom style object to personalize the avatar apperance                          |
+| customStatusStyle     | false    | Object   | {}           | A custom style object to personalize the status indicator                          |
+| useLegacyColors       | false    | Boolean  | false        | **@deprecated** Use original vue-avatar color palette for backwards compatibility  |
+| useTextColorForBorder | false    | Boolean  | false        | Use the text color for the border                                                  |
+| gradient              | false    | Boolean  | false        | Use name-based linear gradients for background                                     |
+| shape                 | false    | String   | circle       | Avatar shape: `circle`, `square`, `squircle`, `hexagon`                            |
+| pointer               | false    | Boolean  | false        | If true, applies `cursor: pointer` even without callback                           |
+| onClick               | false    | Function | null         | Native click callback. Also enables `pointer` cursor.                              |
 
 ## Events
 
 | Event      | Arguments | Description                                                               |
 | ---------- | --------- | ------------------------------------------------------------------------- |
 | `error`    | `event`   | Emitted when `imageSrc` fails to load                                     |
+| `load`     | `event`   | **NEW (v4.1)** Emitted when `imageSrc` successfully loads                 |
 | `activate` | `event`   | Emitted when `interactive` is true and user clicks or presses Enter/Space |
 
 ## Slots
 
-| Slot      | Description                                                                                |
-| --------- | ------------------------------------------------------------------------------------------ |
-| `status`  | Custom status indicator content. Overrides default status rendering but keeps positioning. |
-| `overlay` | Custom overlay content (badges, icons). Positioned relative to container.                  |
+| Slot          | Description                                                                                                             |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `image`       | **NEW (v4.1)** Scoped slot for custom image components (e.g. `<NuxtImg>`). Provides `{ src, alt, size, style, class }`. |
+| `placeholder` | **NEW (v4.1)** Scoped slot for custom placeholder when no name/image is present. Provides `{ size, style }`.            |
+| `status`      | Custom status indicator content. Overrides default status rendering but keeps positioning.                              |
+| `overlay`     | Custom overlay content (badges, icons). Positioned relative to container.                                               |
 
 ## CSS Variables
 
@@ -157,6 +232,12 @@ You can group multiple avatars together with `AvatarGroup`.
   - `triangle`: Pyramid shape where the first avatar is on top, and subsequent avatars form the base. _Note: Triangle layout is limited to 3 items (2 visible + 1 overflow badge if needed)._
 - `onClick`: (Function) Click callback for the entire group.
 - `pointer`: (Boolean) If true, applies `pointer` cursor to the group.
+
+**Events:**
+
+| Event             | Arguments                     | Description                                                                                                  |
+| ----------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `@overflow-click` | `(hidden: Array, all: Array)` | **NEW (v4.1)** Emitted when user clicks the `+N` badge. Provides list of hidden users AND list of all users. |
 
 **Tooltips:**
 
@@ -203,6 +284,16 @@ By default, the component uses a modern color palette with light colors for text
 ```html
 <avatar name="John Doe" :use-legacy-colors="true" />
 ```
+
+## Migration Guide (v4.0 -> v4.1)
+
+v4.1 is fully backward compatible. Summary of new features:
+
+1.  **PixelGen:** Choose `variant="pixel"` for deterministic pixel art. Themes: `earth`, `neon`, `ocean`, `forest`, `sunset`, `midnight`, `candy`, `retro`.
+2.  **Auto-Contrast:** Set `:auto-contrast="true"` to automatically pick black/white text based on background.
+3.  **Global Config:** Pass `defaults` object to `app.use(Avatar, { defaults: { ... } })`.
+4.  **Framework Ready:** Use the `#image` slot for `NuxtImg` or other custom image loading scenarios.
+5.  **Interactive Groups:** Hear when the overflow badge is clicked with `@overflow-click`.
 
 ## Migration Guide (v3 -> v4)
 
