@@ -11,22 +11,45 @@
     @keydown.enter.prevent="onActivate"
     @keydown.space.prevent="onActivate"
   >
+    <!-- Scoped slot for custom image component (e.g., NuxtImg) -->
+    <slot
+      v-if="showImage() && $slots.image"
+      name="image"
+      :src="imageSrc"
+      :alt="accessibleLabel"
+      :size="size"
+      :style="imageStyle"
+      :class="{ 'image-loaded': isLoaded, 'image-transition': transition }"
+      @error="onImageError"
+      @load="onImageLoad"
+    ></slot>
     <img
+      v-else-if="showImage()"
       :style="imageStyle"
       :height="size"
       :width="size"
-      v-if="showImage()"
       :src="imageSrc"
-      loading="lazy"
+      :loading="loading"
+      :class="{ 'image-loaded': isLoaded, 'image-transition': transition }"
       alt=""
       @error="onImageError"
+      @load="onImageLoad"
     />
-    <div
-      v-else
+    <!-- Scoped slot for custom placeholder when no image and no name -->
+    <slot
+      v-else-if="!name && $slots.placeholder"
+      name="placeholder"
+      :size="size"
       :style="avatarStyle"
-      class="avatar noselect"
+    ></slot>
+    <div
+      v-else-if="variant === 'pixel'"
+      :style="avatarStyle"
+      class="avatar avatar-pixel noselect"
       aria-hidden="true"
-    >
+      v-html="pixelSVG"
+    ></div>
+    <div v-else :style="avatarStyle" class="avatar noselect" aria-hidden="true">
       {{ displayName }}
     </div>
     <div
@@ -42,9 +65,16 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
-import { getInitials } from '../utils/initials';
-import { getAvatarColors } from '../utils/colors';
+import { computed, ref, inject } from "vue";
+import { getInitials } from "../utils/initials";
+import { getAvatarColors } from "../utils/colors";
+import {
+  generatePixelGrid,
+  generatePixelSVG,
+  PIXEL_THEMES,
+} from "../utils/pixelgen";
+import { getContrastColor } from "../utils/contrast";
+import { AvatarConfigKey } from "../utils/config";
 
 const BORDERCOLORS = {
   ONLINE: "green",
@@ -82,7 +112,8 @@ const props = defineProps({
   },
   shape: {
     type: String,
-    validator: (value) => ['circle', 'square', 'squircle', 'hexagon'].includes(value),
+    validator: (value) =>
+      ["circle", "square", "squircle", "hexagon"].includes(value),
   },
   imageSrc: {
     type: String,
@@ -90,6 +121,15 @@ const props = defineProps({
   alt: {
     type: String,
     default: undefined,
+  },
+  loading: {
+    type: String,
+    default: "lazy",
+    validator: (value) => ["lazy", "eager"].includes(value),
+  },
+  transition: {
+    type: Boolean,
+    default: true,
   },
   border: {
     type: Boolean,
@@ -101,7 +141,7 @@ const props = defineProps({
   },
   customAvatarStyle: {
     type: Object,
-    default: () => ({}), 
+    default: () => ({}),
   },
   status: {
     type: String,
@@ -110,9 +150,15 @@ const props = defineProps({
       return ["away", "online", "offline", "busy"].includes(value);
     },
   },
+  statusPosition: {
+    type: String,
+    default: "bottom-right",
+    validator: (value) =>
+      ["top-right", "top-left", "bottom-right", "bottom-left"].includes(value),
+  },
   customStatusStyle: {
     type: Object,
-    default: () => ({}), 
+    default: () => ({}),
   },
   sameBorder: {
     type: Boolean,
@@ -145,21 +191,46 @@ const props = defineProps({
     type: Function,
     default: null,
   },
+  variant: {
+    type: String,
+    default: "initials",
+    validator: (value) => ["initials", "pixel"].includes(value),
+  },
+  pixelTheme: {
+    type: String,
+    default: "earth",
+    validator: (value) => Object.keys(PIXEL_THEMES).includes(value),
+  },
+  autoContrast: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-const emit = defineEmits(['error', 'activate']);
+const emit = defineEmits(["error", "activate", "load"]);
 const imageError = ref(false);
+const isLoaded = ref(false);
+
+const globalConfig = inject(AvatarConfigKey, {});
+
+const getConfig = (key, localValue, defaultValue) => {
+  if (localValue !== undefined && localValue !== defaultValue)
+    return localValue;
+  return globalConfig[key] !== undefined ? globalConfig[key] : defaultValue;
+};
 
 const isClickable = computed(() => {
-  return props.pointer || props.interactive || typeof props.onClick === 'function';
+  return (
+    props.pointer || props.interactive || typeof props.onClick === "function"
+  );
 });
 
 function onActivate(event) {
-  if (typeof props.onClick === 'function') {
+  if (typeof props.onClick === "function") {
     props.onClick(event);
   }
   if (props.interactive) {
-    emit('activate', event);
+    emit("activate", event);
   }
 }
 
@@ -171,8 +242,37 @@ const displayName = computed(() => {
   return getInitials(props.name);
 });
 
+const pixelGrid = computed(() => {
+  return generatePixelGrid(props.name);
+});
+
+const pixelSVG = computed(() => {
+  const baseTheme = PIXEL_THEMES[props.pixelTheme] || PIXEL_THEMES.earth;
+
+  // Allow custom overrides via props
+  const customBg = getConfig("background", props.background);
+  const customColor = getConfig("color", props.color);
+
+  let theme = {
+    background: customBg || baseTheme.background,
+    foreground: customColor || baseTheme.foreground,
+  };
+
+  // If no custom overrides, handle dark/light toggle
+  // Consistent with initials: dark=true is dark background, dark=false is light background
+  if (!customBg && !customColor && !props.dark) {
+    theme = {
+      background: baseTheme.foreground,
+      foreground: baseTheme.background,
+    };
+  }
+
+  return generatePixelSVG(pixelGrid.value, theme, props.size);
+});
+
 const displayBackground = computed(() => {
-  if (props.background) return props.background;
+  const bg = getConfig("background", props.background);
+  if (bg) return bg;
   const colors = computedColors.value;
   if (props.useLegacyColors) return colors.background;
   if (props.gradient && colors.gradient) return colors.gradient;
@@ -180,18 +280,31 @@ const displayBackground = computed(() => {
 });
 
 const displayColor = computed(() => {
-  if (props.color) return props.color;
+  const color = getConfig("color", props.color);
+  if (color) return color;
+
+  // If auto-contrast is enabled, calculate based on background
+  if (getConfig("autoContrast", props.autoContrast, false)) {
+    const bg = displayBackground.value;
+    // Only apply auto-contrast if background is a valid hex color
+    if (bg && bg.startsWith("#")) {
+      return getContrastColor(bg);
+    }
+  }
+
   const colors = computedColors.value;
   if (props.useLegacyColors) return colors.color;
   return props.dark ? colors.light : colors.dark;
 });
 
 const displayBorderColor = computed(() => {
-  return props.useTextColorForBorder ? displayColor.value : props.borderColor;
+  return props.useTextColorForBorder
+    ? displayColor.value
+    : getConfig("borderColor", props.borderColor, "white");
 });
 
 const fontSize = computed(() => {
-  const size = props.size || 40;
+  const size = getConfig("size", props.size, 40);
   if (displayName.value.length == 1) return size / 2;
   else if (displayName.value.length == 2) return size / 2.5;
   if (displayName.value.length == 3) return size / 3;
@@ -217,71 +330,105 @@ const statusBackgroundColor = computed(() => {
 });
 
 const statusStyle = computed(() => {
+  // Calculate position based on statusPosition prop
+  const positionStyles = {};
+  const offset = 0; // Can be adjusted based on shape
+
+  const pos = getConfig("statusPosition", props.statusPosition, "bottom-right");
+
+  if (pos.includes("bottom")) {
+    positionStyles.bottom = `${offset}px`;
+    positionStyles.top = "auto";
+  } else {
+    positionStyles.top = `${offset}px`;
+    positionStyles.bottom = "auto";
+  }
+
+  if (pos.includes("right")) {
+    positionStyles.right = `${offset}px`;
+    positionStyles.left = "auto";
+  } else {
+    positionStyles.left = `${offset}px`;
+    positionStyles.right = "auto";
+  }
+
+  const size = getConfig("size", props.size, 40);
+
   const defaultStatusStyle = {
-    height: `${props.size / 4}px`,
-    width: `${props.size / 4}px`,
+    height: `${size / 4}px`,
+    width: `${size / 4}px`,
     backgroundColor: statusBackgroundColor.value,
-    border: `${props.size / 30}px solid ${props.sameBorder ? displayBorderColor.value : 'white'}`,
+    border: `${size / 30}px solid ${
+      props.sameBorder ? displayBorderColor.value : "white"
+    }`,
+    ...positionStyles,
   };
   return Object.assign({}, defaultStatusStyle, props.customStatusStyle);
 });
 
 const imageStyle = computed(() => {
+  const size = getConfig("size", props.size, 40);
   const defaultImageStyle = {
-    display: props.inline ? 'inline-flex' : 'flex',
+    display: props.inline ? "inline-flex" : "flex",
     borderRadius: shapeStyle.value.borderRadius,
     clipPath: shapeStyle.value.clipPath,
     margin: 0,
     padding: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    border: props.border ? `${props.size / 20}px solid ${displayBorderColor.value}` : 'none',
+    alignItems: "center",
+    justifyContent: "center",
+    border: props.border
+      ? `${size / 20}px solid ${displayBorderColor.value}`
+      : "none",
   };
   return Object.assign({}, defaultImageStyle, props.customAvatarStyle);
 });
 
 const avatarStyle = computed(() => {
+  const size = getConfig("size", props.size, 40);
   const defaultAvatarStyle = {
     color: displayColor.value,
-    width: props.size + 'px',
-    height: props.size + 'px',
-    fontSize: fontSize.value + 'px',
+    width: size + "px",
+    height: size + "px",
+    fontSize: fontSize.value + "px",
     background: displayBackground.value,
-    display: props.inline && 'inline-flex',
+    display: props.inline && "inline-flex",
     borderRadius: shapeStyle.value.borderRadius,
     clipPath: shapeStyle.value.clipPath,
-    border: props.border && `${props.size / 20}px solid ${displayBorderColor.value}`,
+    border: props.border && `${size / 20}px solid ${displayBorderColor.value}`,
   };
   return Object.assign({}, defaultAvatarStyle, props.customAvatarStyle);
 });
 
 const shapeStyle = computed(() => {
-  const shape = props.shape || (props.rounded ? 'circle' : 'square');
-  
-  if (shape === 'square') return { borderRadius: '0' };
-  if (shape === 'circle') return { borderRadius: '50%' };
-  if (shape === 'squircle') return { borderRadius: '25%' }; 
-  if (shape === 'hexagon') return { 
-    borderRadius: '0',
-    clipPath: 'polygon(25% 5%, 75% 5%, 95% 50%, 75% 95%, 25% 95%, 5% 50%)'
-  };
-  return { borderRadius: '0' };
+  const shape = props.shape || (props.rounded ? "circle" : "square");
+
+  if (shape === "square") return { borderRadius: "0" };
+  if (shape === "circle") return { borderRadius: "50%" };
+  if (shape === "squircle") return { borderRadius: "25%" };
+  if (shape === "hexagon")
+    return {
+      borderRadius: "0",
+      clipPath: "polygon(25% 5%, 75% 5%, 95% 50%, 75% 95%, 25% 95%, 5% 50%)",
+    };
+  return { borderRadius: "0" };
 });
 
 const rootStyle = computed(() => {
+  const size = getConfig("size", props.size, 40);
   return {
-    '--va-size': `${props.size}px`,
-    '--va-bg': displayBackground.value,
-    '--va-color': displayColor.value,
-    '--va-border-color': displayBorderColor.value,
-    '--va-radius': shapeStyle.value.borderRadius,
-    '--va-clip-path': shapeStyle.value.clipPath || 'none',
-    '--va-font-size': `${fontSize.value}px`,
+    "--va-size": `${size}px`,
+    "--va-bg": displayBackground.value,
+    "--va-color": displayColor.value,
+    "--va-border-color": displayBorderColor.value,
+    "--va-radius": shapeStyle.value.borderRadius,
+    "--va-clip-path": shapeStyle.value.clipPath || "none",
+    "--va-font-size": `${fontSize.value}px`,
   };
 });
 
 const accessibleLabel = computed(() => {
-  const label = props.alt || (props.name ? `Avatar of ${props.name}` : "User avatar");
+  const label =
+    props.alt || (props.name ? `Avatar of ${props.name}` : "User avatar");
   if (props.status) {
     return `${label}. User is ${props.status}`;
   }
@@ -290,14 +437,18 @@ const accessibleLabel = computed(() => {
 
 function onImageError(event) {
   imageError.value = true;
-  emit('error', event);
+  isLoaded.value = false;
+  emit("error", event);
+}
+
+function onImageLoad(event) {
+  isLoaded.value = true;
+  emit("load", event);
 }
 
 function showImage() {
   return props.imageSrc && !imageError.value;
 }
-
-
 </script>
 
 <style scoped>
@@ -315,6 +466,13 @@ function showImage() {
   justify-content: center;
   font-weight: 700;
 }
+.avatar-pixel {
+  padding: 0;
+  overflow: hidden;
+}
+.avatar-pixel svg {
+  display: block;
+}
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */
@@ -324,7 +482,7 @@ function showImage() {
   user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 }
 .container {
-  position:relative;
+  position: relative;
 }
 .container.is-clickable,
 .container.is-clickable * {
@@ -332,8 +490,13 @@ function showImage() {
 }
 .status-indicator {
   position: absolute;
-  bottom: 0;
-  left: 0;
   border-radius: 50%;
+}
+.container img.image-transition {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+.container img.image-transition.image-loaded {
+  opacity: 1;
 }
 </style>
