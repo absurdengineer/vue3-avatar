@@ -1,7 +1,8 @@
 {
   "name": "vue3-avatar",
-  "version": "4.1.0",
-  "description": "",
+  "version": "4.1.1",
+  "license": "MIT",
+  "description": "A lightweight, fully customizable, accessible, and SSR-safe user avatar component for Vue 3 and Nuxt. Supports initials, custom images, pixel-art generation (identicons), groups with overflow, and auto-contrast text. Perfect for user profiles, team displays, and comment sections.",
   "main": "dist/avatar.ssr.js",
   "browser": "dist/avatar.esm.js",
   "module": "dist/avatar.esm.js",
@@ -53,13 +54,28 @@
     "node": ">=12"
   },
   "keywords": [
-    "avatar",
     "vue",
     "vue3",
+    "avatar",
     "vue3-avatar",
     "user-avatar",
+    "profile-picture",
+    "identicon",
+    "initials",
+    "pixel-art",
+    "component",
+    "ui",
+    "nuxt",
+    "ssr",
+    "typescript-ready",
+    "accessible",
+    "a11y",
     "vuejs"
   ],
+  "homepage": "https://github.com/absurdengineer/vue3-avatar#readme",
+  "bugs": {
+    "url": "https://github.com/absurdengineer/vue3-avatar/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/absurdengineer/vue3-avatar.git"
