@@ -1,17 +1,26 @@
 # vue3-avatar
 
-A user avatar component for vue3. By default it uses light colors for Background and dark colors for Text.
+> A lightweight, customizable, and accessible avatar component for Vue 3 and Nuxt.
 
-This component is highly inspired from [vue-avatar](https://github.com/eliep/vue-avatar).
+[![npm version](https://img.shields.io/npm/v/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
+[![Downloads](https://img.shields.io/npm/dt/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
+[![License](https://img.shields.io/npm/l/vue3-avatar.svg?style=flat-square)](https://github.com/absurdengineer/vue3-avatar/blob/master/LICENSE)
 
-This component computes the Initials from provided name with following rules:
+`vue3-avatar` is a feature-rich component for displaying user profiles, team members, or entity icons. It supports **initials-based avatars**, **custom images** with lazy loading, **deterministic pixel art (identicons)**, and **avatar groups** with overflow handling.
 
-1. Splits the name by spaces and hyphens.
-2. Finds the first letter of each parts.
-3. Maximum length of Avatar letters is 3.
-4. If the name is splitted into more than 2 parts then picks the first letter of part1, part2 and last part.
+Whether you need a simple profile picture or a complex team display, `vue3-avatar` handles fallback logic, accessibility, and responsiveness out of the box.
 
-This component can now also show an image by setting the `imageSrc` prop. If an error occurs in fetching the image from the provided source, the component falls back to Initials.
+## Key Features
+
+- ⚡ **Lightweight & Fast**: Optimized for Vue 3.
+- 🎨 **Smart Initials**: Automatically extracts initials from names (e.g., "Tony Stark" → "TS").
+- 🖼️ **Image Support**: Seamlessly handles image URLs with automatic fallback to initials or pixel art on error.
+- 👾 **PixelGen**: Generates consistent, deterministic pixel art (identicons) like GitHub/Gravatar.
+- 👥 **Avatar Groups**: Easily stack avatars for teams with `+N` overflow badges.
+- 🌗 **Auto-Contrast**: Automatically adjusts text color (black/white) based on background luminance.
+- ♿ **Accessible**: Built with a11y in mind (ARIA roles, keyboard support).
+- 🟢 **Status Indicators**: Built-in support for online/offline/busy status badges.
+- ☁️ **SSR & Nuxt Ready**: Safe for server-side rendering with no hydration mismatches.
 
 ## Examples
 
