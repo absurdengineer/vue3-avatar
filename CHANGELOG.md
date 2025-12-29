@@ -2,7 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.1.0] - 2025-12-19
+## [4.1.1] - 2025-12-29
+
+### Documentation & SEO
+
+- **SEO Overhaul:**
+
+  - Updated `package.json` description with rich keywords for better NPM/Google discoverability.
+  - Added repository, homepage, and bugs links to `package.json`.
+  - Added comprehensive "Key Features" section to `README.md`.
+  - Added relevant keywords (SSR, Nuxt, a11y, pixel-art) to package metadata.
+
+- **Community Standards:**
+  - Added `CONTRIBUTING.md` guide.
+  - Added `LICENSE` file (MIT).
+  - Added status badges to README (Version, Downloads, License).
 
 ### Added
 
