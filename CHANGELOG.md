@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0] - 2026-07-26
+
+### Breaking Changes & Package Rename
+
+- **Package Rename:**
+  - Renamed npm package from `vue3-avatar` to `avatar-vue`.
+  - Referred to project in documentation as **Avatar Vue**.
+  - Deprecated legacy `vue3-avatar` npm package with migration pointers.
+  - Renamed GitHub repository to `absurdengineer/avatar-vue`.
+  - Updated default imports in documentation to `import { Avatar } from "avatar-vue"`.
+
 ## [4.1.1] - 2025-12-29
 
 ### Documentation & SEO

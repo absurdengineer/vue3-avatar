@@ -1,14 +1,17 @@
-# vue3-avatar
+# Avatar Vue
 
 > A lightweight, customizable, and accessible avatar component for Vue 3 and Nuxt.
 
-[![npm version](https://img.shields.io/npm/v/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
-[![Downloads](https://img.shields.io/npm/dt/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
-[![License](https://img.shields.io/npm/l/vue3-avatar.svg?style=flat-square)](https://github.com/absurdengineer/vue3-avatar/blob/master/LICENSE)
+[![npm version](https://img.shields.io/npm/v/avatar-vue.svg?style=flat-square)](https://www.npmjs.com/package/avatar-vue)
+[![Downloads](https://img.shields.io/npm/dt/avatar-vue.svg?style=flat-square)](https://www.npmjs.com/package/avatar-vue)
+[![License](https://img.shields.io/npm/l/avatar-vue.svg?style=flat-square)](https://github.com/absurdengineer/avatar-vue/blob/master/LICENSE)
 
-`vue3-avatar` is a feature-rich component for displaying user profiles, team members, or entity icons. It supports **initials-based avatars**, **custom images** with lazy loading, **deterministic pixel art (identicons)**, and **avatar groups** with overflow handling.
+> [!NOTE]
+> **Package Rename Notice**: `vue3-avatar` has been renamed to **`avatar-vue`** starting with **v5.0.0**. Please update your `package.json` dependency to `avatar-vue: ^5.0.0`.
 
-Whether you need a simple profile picture or a complex team display, `vue3-avatar` handles fallback logic, accessibility, and responsiveness out of the box.
+**Avatar Vue** is a feature-rich component for displaying user profiles, team members, or entity icons. It supports **initials-based avatars**, **custom images** with lazy loading, **deterministic pixel art (identicons)**, and **avatar groups** with overflow handling.
+
+Whether you need a simple profile picture or a complex team display, **Avatar Vue** handles fallback logic, accessibility, and responsiveness out of the box.
 
 ## Key Features
 
@@ -53,18 +56,18 @@ Whether you need a simple profile picture or a complex team display, `vue3-avata
 
 ## Installation
 
-`npm install vue3-avatar`
+`npm install avatar-vue`
 
 ## Usage
 
-vue3-avatar is very easy to use.
+**Avatar Vue** is very easy to use.
 
 ### ES6
 
 **For Local Registration**
 
 ```javascript
-import { Avatar, AvatarGroup } from "vue3-avatar";
+import { Avatar, AvatarGroup } from "avatar-vue";
 
 export default {
   // ...
@@ -84,7 +87,7 @@ Update main.js
 ```javascript
 import { createApp } from "vue";
 import App from "./App.vue";
-import Avatar from "vue3-avatar";
+import Avatar from "avatar-vue";
 
 const app = createApp(App);
 
@@ -108,7 +111,7 @@ After importing the component, you can use it in your templates as:
 
 ## Nuxt.js Support
 
-vue3-avatar v4.1 is fully SSR-safe and optimized for Nuxt.js 3+.
+**Avatar Vue** v5.0 is fully SSR-safe and optimized for Nuxt.js 3+.
 
 ### 1. Installation in Nuxt
 
@@ -116,7 +119,7 @@ Create a plugin file `plugins/avatar.ts`:
 
 ```typescript
 import { defineNuxtPlugin } from "#app";
-import Avatar from "vue3-avatar";
+import Avatar from "avatar-vue";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(Avatar, {
@@ -276,7 +279,7 @@ v4.0.0 focuses heavily on accessibility:
 
 ## Color Systems
 
-vue3-avatar supports two color systems:
+**Avatar Vue** supports two color systems:
 
 ### Default Colors (Modern)
 

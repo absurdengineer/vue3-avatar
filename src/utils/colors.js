@@ -188,7 +188,7 @@ export function getAvatarColors(name, useLegacyColors = false) {
 
   if (useLegacyColors) {
     if (process.env.NODE_ENV !== 'production') {
-      console.warn('vue3-avatar: useLegacyColors is deprecated and will be removed in a future version.');
+      console.warn('avatar-vue: useLegacyColors is deprecated and will be removed in a future version.');
     }
     
     let backgroundColor = legacyBackgroundColors[0];
