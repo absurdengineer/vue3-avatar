@@ -25,6 +25,18 @@ describe('Avatar Component', () => {
     expect(img.attributes('src')).toBe('https://example.com/avatar.png')
   })
 
+  it('only removes the border from images', () => {
+    const imageAvatar = mount(Avatar, {
+      props: { name: 'John Doe', imageSrc: 'https://example.com/avatar.png', border: false }
+    })
+    const initialsAvatar = mount(Avatar, {
+      props: { name: 'John Doe', border: false }
+    })
+
+    expect(imageAvatar.find('img').attributes('style')).toContain('border: 0px')
+    expect(initialsAvatar.find('.avatar').attributes('style')).toContain('border: 2px solid')
+  })
+
   it('uses alt prop when provided in accessible label', () => {
     const wrapper = mount(Avatar, {
       props: {

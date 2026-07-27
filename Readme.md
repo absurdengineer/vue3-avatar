@@ -1,17 +1,33 @@
-# Avatar Vue
+# vue3-avatar
 
 > A lightweight, customizable, and accessible avatar component for Vue 3 and Nuxt.
 
-[![npm version](https://img.shields.io/npm/v/avatar-vue.svg?style=flat-square)](https://www.npmjs.com/package/avatar-vue)
-[![Downloads](https://img.shields.io/npm/dt/avatar-vue.svg?style=flat-square)](https://www.npmjs.com/package/avatar-vue)
-[![License](https://img.shields.io/npm/l/avatar-vue.svg?style=flat-square)](https://github.com/absurdengineer/avatar-vue/blob/master/LICENSE)
-
-> [!NOTE]
-> **Package Rename Notice**: `vue3-avatar` has been renamed to **`avatar-vue`** starting with **v5.0.0**. Please update your `package.json` dependency to `avatar-vue: ^5.0.0`.
+[![npm version](https://img.shields.io/npm/v/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
+[![Downloads](https://img.shields.io/npm/dt/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
+[![License](https://img.shields.io/npm/l/vue3-avatar.svg?style=flat-square)](https://github.com/absurdengineer/vue3-avatar/blob/master/LICENSE)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/vue3-avatar?style=flat-square&label=minzipped)](https://bundlephobia.com/package/vue3-avatar)
 
 **Avatar Vue** is a feature-rich component for displaying user profiles, team members, or entity icons. It supports **initials-based avatars**, **custom images** with lazy loading, **deterministic pixel art (identicons)**, and **avatar groups** with overflow handling.
 
 Whether you need a simple profile picture or a complex team display, **Avatar Vue** handles fallback logic, accessibility, and responsiveness out of the box.
+
+## Why vue3-avatar?
+
+Most UI libraries include an avatar, but only as a primitive — a circle, maybe an image.
+`vue3-avatar` is the choice when you need more without adding a full design system:
+
+| Feature | vue3-avatar | Vuetify `v-avatar` | PrimeVue `Avatar` |
+|---|---|---|---|
+| Initials (multi-word) | ✅ Smart extraction | ✅ | ✅ |
+| Pixel art / identicons | ✅ 8 themes | ❌ | ❌ |
+| Avatar groups + overflow | ✅ | ❌ | ❌ |
+| Auto-contrast text | ✅ | ❌ | ❌ |
+| Status badges | ✅ 4 positions | ❌ | ✅ |
+| SSR / Nuxt safe | ✅ | ✅ | ✅ |
+| Zero dependencies | ✅ | ❌ (full lib) | ❌ (full lib) |
+| Custom image slot | ✅ (NuxtImg ready) | ❌ | ❌ |
+
+Works with Tailwind CSS, UnoCSS, Headless UI, or any setup that doesn't include a UI library. Drop it in and it handles the rest.
 
 ## Key Features
 
@@ -36,27 +52,29 @@ Whether you need a simple profile picture or a complex team display, **Avatar Vu
 
 ### Shapes & Base Styles
 
-![shapes and base styles](/img/shapes_base.png)
+![Shapes and base styles](img/shapes_base.png)
 
 ### Status & Presence
 
-![status and presence](/img/status_presence.png)
+![Status and presence](img/status_presence.png)
 
 ### PixelGen Themes
 
-![pixelgen themes](/img/pixelgen.png)
+![PixelGen themes](img/pixelgen.png)
 
 ### Auto-Contrast & Images
 
-![auto contrast and images](/img/auto_contrast.png)
+![Auto-contrast and images](img/auto_contrast.png)
 
 ### Interactive Avatar Groups
 
-![avatar groups](/img/avatar_groups.png)
+![Avatar groups](img/avatar_groups.png)
 
 ## Installation
 
-`npm install avatar-vue`
+```bash
+npm install vue3-avatar
+```
 
 ## Usage
 
@@ -67,7 +85,7 @@ Whether you need a simple profile picture or a complex team display, **Avatar Vu
 **For Local Registration**
 
 ```javascript
-import { Avatar, AvatarGroup } from "avatar-vue";
+import { Avatar, AvatarGroup } from "vue3-avatar";
 
 export default {
   // ...
@@ -87,7 +105,7 @@ Update main.js
 ```javascript
 import { createApp } from "vue";
 import App from "./App.vue";
-import Avatar from "avatar-vue";
+import Avatar from "vue3-avatar";
 
 const app = createApp(App);
 
@@ -103,10 +121,10 @@ app.use(Avatar, {
 });
 ```
 
-After importing the component, you can use it in your templates as:
+After importing the component, use it in your template:
 
 ```html
-<avatar name="John Doe"></avatar>
+<Avatar name="John Doe" />
 ```
 
 ## Nuxt.js Support
@@ -119,7 +137,7 @@ Create a plugin file `plugins/avatar.ts`:
 
 ```typescript
 import { defineNuxtPlugin } from "#app";
-import Avatar from "avatar-vue";
+import Avatar from "vue3-avatar";
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.use(Avatar, {
@@ -158,44 +176,37 @@ Colors and Pixel patterns are generated deterministically based on the `name` pr
 
 ## Props
 
-| Property              | Required | Type     | Default      | Description                                                                        |
-| --------------------- | -------- | -------- | ------------ | ---------------------------------------------------------------------------------- |
-| name                  | true     | String   | -            | Name to compute Avatar letters                                                     |
-| color                 | false    | String   | white        | Text color for Avatar letters                                                      |
-| background            | false    | String   | navy         | Background color for Avatar                                                        |
-| size                  | false    | Number   | 40           | Pixel size for Avatar (Same Height and Width)                                      |
-| dark                  | false    | Boolean  | false        | Use dark background with light text                                                |
-| inline                | false    | Boolean  | false        | To create inline Avatar                                                            |
-| rounded               | false    | Boolean  | true         | Square or Rounded                                                                  |
-| imageSrc              | false    | String   | null         | To show an Image                                                                   |
-| loading               | false    | String   | lazy         | **NEW (v4.1)** Native image loading: `lazy` \| `eager`                             |
-| transition            | false    | Boolean  | true         | **NEW (v4.1)** Enable fade-in transition when image loads                          |
-| alt                   | false    | String   | derived      | Alt text for accessibility                                                         |
-| border                | false    | Boolean  | true         | Show or Hide the border                                                            |
-| borderColor           | false    | String   | white        | Border color for avatar                                                            |
-| status                | false    | String   | null         | To set user status as "online", "away", "offline", or "busy"                       |
-| statusPosition        | false    | String   | bottom-right | **NEW (v4.1)** Position: `top-right`, `top-left`, `bottom-right`, `bottom-left`    |
-| sameBorder            | false    | Boolean  | false        | To have same border in Avatar as well as Status Indicator                          |
-| interactive           | false    | Boolean  | false        | Enables keyboard interaction and role="button"                                     |
-| autoContrast          | false    | Boolean  | false        | **NEW (v4.1)** Automatically choose white/black text based on background luminance |
-| variant               | false    | String   | initials     | **NEW (v4.1)** Avatar type: `initials` \| `pixel`                                  |
-| pixelTheme            | false    | String   | earth        | **NEW (v4.1)** Pixel art theme (see below)                                         |
-| customAvatarStyle     | false    | Object   | {}           | A custom style object to personalize the avatar apperance                          |
-| customStatusStyle     | false    | Object   | {}           | A custom style object to personalize the status indicator                          |
-| useLegacyColors       | false    | Boolean  | false        | **@deprecated** Use original vue-avatar color palette for backwards compatibility  |
-| useTextColorForBorder | false    | Boolean  | false        | Use the text color for the border                                                  |
-| gradient              | false    | Boolean  | false        | Use name-based linear gradients for background                                     |
-| shape                 | false    | String   | circle       | Avatar shape: `circle`, `square`, `squircle`, `hexagon`                            |
-| pointer               | false    | Boolean  | false        | If true, applies `cursor: pointer` even without callback                           |
-| onClick               | false    | Function | null         | Native click callback. Also enables `pointer` cursor.                              |
+| Property | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | String | required | Name used for initials, generated colours, pixel art, and the accessible label. |
+| `imageSrc` | String | — | Image URL. Use `image-src` in templates. |
+| `size` | Number | `40` | Avatar diameter in pixels. |
+| `inline` | Boolean | `false` | Displays the avatar inline. |
+| `shape` | String | derived | `circle`, `square`, `squircle`, or `hexagon`. Overrides `rounded`. |
+| `rounded` | Boolean | `true` | Uses a circle when true or a square when false, if `shape` is omitted. |
+| `variant` | String | `initials` | `initials` or `pixel`. |
+| `pixelTheme` | String | `earth` | `earth`, `neon`, `ocean`, `forest`, `sunset`, `midnight`, `candy`, or `retro`. |
+| `color` / `background` | String | generated | Override the foreground or background colour. |
+| `dark` / `gradient` | Boolean | `false` | Use the dark palette or a name-based gradient. |
+| `autoContrast` | Boolean | `false` | Choose black or white text for a hexadecimal background colour. |
+| `border` / `borderColor` | Boolean / String | `true` / `white` | Control the native image border; initials and pixel avatars keep their outline. |
+| `status` | String | — | `online`, `away`, `offline`, or `busy`. |
+| `statusPosition` | String | `bottom-right` | `top-right`, `top-left`, `bottom-right`, or `bottom-left`. |
+| `alt` | String | derived | Accessible label; defaults to `Avatar of {name}`. |
+| `loading` / `transition` | String / Boolean | `lazy` / `true` | Native image loading and image fade-in behaviour. |
+| `interactive` | Boolean | `false` | Enables keyboard activation and emits `activate`. |
+| `pointer` / `onClick` | Boolean / Function | `false` / — | Shows a pointer cursor; `onClick` also receives activation events. |
+| `customAvatarStyle` / `customStatusStyle` | Object | `{}` | Inline style overrides. |
+| `sameBorder` / `useTextColorForBorder` | Boolean | `false` | Status-border and avatar-border colour options. |
+| `useLegacyColors` | Boolean | `false` | Uses the legacy `vue-avatar` palette. |
 
 ## Events
 
 | Event      | Arguments | Description                                                               |
 | ---------- | --------- | ------------------------------------------------------------------------- |
 | `error`    | `event`   | Emitted when `imageSrc` fails to load                                     |
-| `load`     | `event`   | **NEW (v4.1)** Emitted when `imageSrc` successfully loads                 |
-| `activate` | `event`   | Emitted when `interactive` is true and user clicks or presses Enter/Space |
+| `load`     | `event`   | Emitted when `imageSrc` successfully loads                                |
+| `activate` | `event`   | Emitted when an interactive avatar is clicked or activated with Enter/Space |
 
 ## Slots
 

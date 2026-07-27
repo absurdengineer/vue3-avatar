@@ -1,0 +1,17 @@
+/* VitePress limits ordinary documentation to a narrow prose column. The
+ * playground is an application-like surface, so it intentionally uses the
+ * available layout width for controls, preview, and generated code. */
+@media (min-width: 960px) {
+  .VPDoc:has(.vp-doc._playground) .container {
+    max-width: 1440px !important;
+  }
+
+  .VPDoc:has(.vp-doc._playground) .content {
+    flex: 1;
+    max-width: none !important;
+  }
+
+  .VPDoc:has(.vp-doc._playground) .content-container {
+    max-width: none !important;
+  }
+}

@@ -2,16 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [5.0.0] - 2026-07-26
+## [4.1.2] - 2026-07-27
 
-### Breaking Changes & Package Rename
+### Accessibility
 
-- **Package Rename:**
-  - Renamed npm package from `vue3-avatar` to `avatar-vue`.
-  - Referred to project in documentation as **Avatar Vue**.
-  - Deprecated legacy `vue3-avatar` npm package with migration pointers.
-  - Renamed GitHub repository to `absurdengineer/avatar-vue`.
-  - Updated default imports in documentation to `import { Avatar } from "avatar-vue"`.
+- Made interactive avatar groups keyboard-accessible with Enter and Space.
+- Changed the AvatarGroup overflow control to a labelled native button.
+
+### Documentation
+
+- Added a live VitePress documentation site and interactive playground.
+- Corrected the API reference to match the component's public props, events, and slots.
 
 ## [4.1.1] - 2025-12-29
 

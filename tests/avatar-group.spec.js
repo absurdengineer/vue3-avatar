@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AvatarGroup from '../src/components/AvatarGroup.vue'
 import Avatar from '../src/components/Avatar.vue'
@@ -33,6 +33,37 @@ describe('AvatarGroup Component', () => {
     expect(wrapper.findAll('.av')).toHaveLength(2)
     expect(wrapper.find('.avatar-overflow').exists()).toBe(true)
     expect(wrapper.find('.avatar-overflow').text()).toBe('+1')
+    expect(wrapper.find('.avatar-overflow').element.tagName).toBe('BUTTON')
+    expect(wrapper.find('.avatar-overflow').attributes('aria-label')).toBe('Show 1 more avatar')
+  })
+
+  it('emits overflow-click from a keyboard-accessible overflow button', async () => {
+    const wrapper = mount(AvatarGroup, {
+      props: { max: 1 },
+      slots: {
+        default: () => [
+          h(Avatar, { name: 'Tony Stark' }),
+          h(Avatar, { name: 'Bruce Banner' })
+        ]
+      }
+    })
+
+    const overflow = wrapper.find('button.avatar-overflow')
+    expect(overflow.attributes('type')).toBe('button')
+    expect(overflow.attributes('aria-label')).toBe('Show 1 more avatar: Bruce Banner')
+    await overflow.trigger('click')
+    expect(wrapper.emitted('overflow-click')).toHaveLength(1)
+  })
+
+  it('makes a clickable group keyboard accessible', async () => {
+    const onClick = vi.fn()
+    const wrapper = mount(AvatarGroup, { props: { onClick } })
+
+    expect(wrapper.attributes('role')).toBe('button')
+    expect(wrapper.attributes('tabindex')).toBe('0')
+    await wrapper.trigger('keydown', { key: 'Enter' })
+    await wrapper.trigger('keydown', { key: ' ' })
+    expect(onClick).toHaveBeenCalledTimes(2)
   })
 
   it('applies overlap style', () => {

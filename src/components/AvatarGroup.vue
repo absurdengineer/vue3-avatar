@@ -94,8 +94,16 @@ export default defineComponent({
         .filter(Boolean);
 
       const handleOverflowClick = (e) => {
-        e.stopPropagation(); // Prevent triggering group onClick
+        e.stopPropagation();
         emit("overflow-click", hiddenUsers, allUsers);
+      };
+
+      const handleGroupKeydown = (event) => {
+        if (!props.onClick || !["Enter", " ", "Spacebar"].includes(event.key)) {
+          return;
+        }
+        event.preventDefault();
+        props.onClick(event);
       };
 
       const size = getConfig("size", props.size, 40);
@@ -105,10 +113,14 @@ export default defineComponent({
       const overflowBadge =
         overflowCount > 0
           ? h(
-              "div",
+              "button",
               {
+                type: "button",
                 class: "avatar-overflow",
                 title: hiddenNames,
+                "aria-label": `Show ${overflowCount} more avatar${
+                  overflowCount === 1 ? "" : "s"
+                }${hiddenNames ? `: ${hiddenNames}` : ""}`,
                 onClick: handleOverflowClick,
                 style: {
                   width: `${size}px`,
@@ -137,7 +149,13 @@ export default defineComponent({
             { "is-clickable": props.pointer || !!props.onClick },
           ],
           title: allNames,
+          role: props.onClick ? "button" : undefined,
+          tabindex: props.onClick ? 0 : undefined,
+          "aria-label": props.onClick
+            ? `Avatar group${allNames ? `: ${allNames}` : ""}`
+            : undefined,
           onClick: (e) => props.onClick && props.onClick(e),
+          onKeydown: handleGroupKeydown,
           style: {
             "--va-group-overlap": `-${overlap}px`,
             "--va-size": `${size}px`,
@@ -198,6 +216,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+  appearance: none;
   background: #ccc;
   color: white;
   border-radius: 50%;
@@ -206,5 +225,10 @@ export default defineComponent({
   border: 2px solid white; /* Hardcoded default? */
   box-sizing: border-box;
   position: relative; /* To stack properly */
+  padding: 0;
+}
+.avatar-overflow:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 </style>

@@ -24,3 +24,7 @@ yarn-error.log*
 .agent
 .gemini-clipboard
 .gemini_clipboard
+
+# VitePress docs output
+docs/.vitepress/dist
+docs/.vitepress/cache
