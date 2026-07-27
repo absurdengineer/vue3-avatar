@@ -2,10 +2,12 @@
 
 > A lightweight, customizable, and accessible avatar component for Vue 3 and Nuxt.
 
+**📖 [Read the Documentation & Try the Interactive Playground](https://vue3-avatar.vercel.app/)**
+
 [![npm version](https://img.shields.io/npm/v/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
 [![Downloads](https://img.shields.io/npm/dt/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
 [![License](https://img.shields.io/npm/l/vue3-avatar.svg?style=flat-square)](https://github.com/absurdengineer/vue3-avatar/blob/master/LICENSE)
-[![Bundle Size](https://img.shields.io/bundlephobia/minzip/vue3-avatar?style=flat-square&label=minzipped)](https://bundlephobia.com/package/vue3-avatar)
+[![Docs](https://img.shields.io/badge/docs-live-brightgreen?style=flat-square)](https://vue3-avatar.vercel.app/)
 
 **Avatar Vue** is a feature-rich component for displaying user profiles, team members, or entity icons. It supports **initials-based avatars**, **custom images** with lazy loading, **deterministic pixel art (identicons)**, and **avatar groups** with overflow handling.
 
@@ -16,16 +18,16 @@ Whether you need a simple profile picture or a complex team display, **Avatar Vu
 Most UI libraries include an avatar, but only as a primitive — a circle, maybe an image.
 `vue3-avatar` is the choice when you need more without adding a full design system:
 
-| Feature | vue3-avatar | Vuetify `v-avatar` | PrimeVue `Avatar` |
-|---|---|---|---|
-| Initials (multi-word) | ✅ Smart extraction | ✅ | ✅ |
-| Pixel art / identicons | ✅ 8 themes | ❌ | ❌ |
-| Avatar groups + overflow | ✅ | ❌ | ❌ |
-| Auto-contrast text | ✅ | ❌ | ❌ |
-| Status badges | ✅ 4 positions | ❌ | ✅ |
-| SSR / Nuxt safe | ✅ | ✅ | ✅ |
-| Zero dependencies | ✅ | ❌ (full lib) | ❌ (full lib) |
-| Custom image slot | ✅ (NuxtImg ready) | ❌ | ❌ |
+| Feature                  | vue3-avatar         | Vuetify `v-avatar` | PrimeVue `Avatar` |
+| ------------------------ | ------------------- | ------------------ | ----------------- |
+| Initials (multi-word)    | ✅ Smart extraction | ✅                 | ✅                |
+| Pixel art / identicons   | ✅ 8 themes         | ❌                 | ❌                |
+| Avatar groups + overflow | ✅                  | ❌                 | ❌                |
+| Auto-contrast text       | ✅                  | ❌                 | ❌                |
+| Status badges            | ✅ 4 positions      | ❌                 | ✅                |
+| SSR / Nuxt safe          | ✅                  | ✅                 | ✅                |
+| Zero dependencies        | ✅                  | ❌ (full lib)      | ❌ (full lib)     |
+| Custom image slot        | ✅ (NuxtImg ready)  | ❌                 | ❌                |
 
 Works with Tailwind CSS, UnoCSS, Headless UI, or any setup that doesn't include a UI library. Drop it in and it handles the rest.
 
@@ -176,36 +178,36 @@ Colors and Pixel patterns are generated deterministically based on the `name` pr
 
 ## Props
 
-| Property | Type | Default | Description |
-| --- | --- | --- | --- |
-| `name` | String | required | Name used for initials, generated colours, pixel art, and the accessible label. |
-| `imageSrc` | String | — | Image URL. Use `image-src` in templates. |
-| `size` | Number | `40` | Avatar diameter in pixels. |
-| `inline` | Boolean | `false` | Displays the avatar inline. |
-| `shape` | String | derived | `circle`, `square`, `squircle`, or `hexagon`. Overrides `rounded`. |
-| `rounded` | Boolean | `true` | Uses a circle when true or a square when false, if `shape` is omitted. |
-| `variant` | String | `initials` | `initials` or `pixel`. |
-| `pixelTheme` | String | `earth` | `earth`, `neon`, `ocean`, `forest`, `sunset`, `midnight`, `candy`, or `retro`. |
-| `color` / `background` | String | generated | Override the foreground or background colour. |
-| `dark` / `gradient` | Boolean | `false` | Use the dark palette or a name-based gradient. |
-| `autoContrast` | Boolean | `false` | Choose black or white text for a hexadecimal background colour. |
-| `border` / `borderColor` | Boolean / String | `true` / `white` | Control the native image border; initials and pixel avatars keep their outline. |
-| `status` | String | — | `online`, `away`, `offline`, or `busy`. |
-| `statusPosition` | String | `bottom-right` | `top-right`, `top-left`, `bottom-right`, or `bottom-left`. |
-| `alt` | String | derived | Accessible label; defaults to `Avatar of {name}`. |
-| `loading` / `transition` | String / Boolean | `lazy` / `true` | Native image loading and image fade-in behaviour. |
-| `interactive` | Boolean | `false` | Enables keyboard activation and emits `activate`. |
-| `pointer` / `onClick` | Boolean / Function | `false` / — | Shows a pointer cursor; `onClick` also receives activation events. |
-| `customAvatarStyle` / `customStatusStyle` | Object | `{}` | Inline style overrides. |
-| `sameBorder` / `useTextColorForBorder` | Boolean | `false` | Status-border and avatar-border colour options. |
-| `useLegacyColors` | Boolean | `false` | Uses the legacy `vue-avatar` palette. |
+| Property                                  | Type               | Default          | Description                                                                     |
+| ----------------------------------------- | ------------------ | ---------------- | ------------------------------------------------------------------------------- |
+| `name`                                    | String             | required         | Name used for initials, generated colours, pixel art, and the accessible label. |
+| `imageSrc`                                | String             | —                | Image URL. Use `image-src` in templates.                                        |
+| `size`                                    | Number             | `40`             | Avatar diameter in pixels.                                                      |
+| `inline`                                  | Boolean            | `false`          | Displays the avatar inline.                                                     |
+| `shape`                                   | String             | derived          | `circle`, `square`, `squircle`, or `hexagon`. Overrides `rounded`.              |
+| `rounded`                                 | Boolean            | `true`           | Uses a circle when true or a square when false, if `shape` is omitted.          |
+| `variant`                                 | String             | `initials`       | `initials` or `pixel`.                                                          |
+| `pixelTheme`                              | String             | `earth`          | `earth`, `neon`, `ocean`, `forest`, `sunset`, `midnight`, `candy`, or `retro`.  |
+| `color` / `background`                    | String             | generated        | Override the foreground or background colour.                                   |
+| `dark` / `gradient`                       | Boolean            | `false`          | Use the dark palette or a name-based gradient.                                  |
+| `autoContrast`                            | Boolean            | `false`          | Choose black or white text for a hexadecimal background colour.                 |
+| `border` / `borderColor`                  | Boolean / String   | `true` / `white` | Control the native image border; initials and pixel avatars keep their outline. |
+| `status`                                  | String             | —                | `online`, `away`, `offline`, or `busy`.                                         |
+| `statusPosition`                          | String             | `bottom-right`   | `top-right`, `top-left`, `bottom-right`, or `bottom-left`.                      |
+| `alt`                                     | String             | derived          | Accessible label; defaults to `Avatar of {name}`.                               |
+| `loading` / `transition`                  | String / Boolean   | `lazy` / `true`  | Native image loading and image fade-in behaviour.                               |
+| `interactive`                             | Boolean            | `false`          | Enables keyboard activation and emits `activate`.                               |
+| `pointer` / `onClick`                     | Boolean / Function | `false` / —      | Shows a pointer cursor; `onClick` also receives activation events.              |
+| `customAvatarStyle` / `customStatusStyle` | Object             | `{}`             | Inline style overrides.                                                         |
+| `sameBorder` / `useTextColorForBorder`    | Boolean            | `false`          | Status-border and avatar-border colour options.                                 |
+| `useLegacyColors`                         | Boolean            | `false`          | Uses the legacy `vue-avatar` palette.                                           |
 
 ## Events
 
-| Event      | Arguments | Description                                                               |
-| ---------- | --------- | ------------------------------------------------------------------------- |
-| `error`    | `event`   | Emitted when `imageSrc` fails to load                                     |
-| `load`     | `event`   | Emitted when `imageSrc` successfully loads                                |
+| Event      | Arguments | Description                                                                 |
+| ---------- | --------- | --------------------------------------------------------------------------- |
+| `error`    | `event`   | Emitted when `imageSrc` fails to load                                       |
+| `load`     | `event`   | Emitted when `imageSrc` successfully loads                                  |
 | `activate` | `event`   | Emitted when an interactive avatar is clicked or activated with Enter/Space |
 
 ## Slots

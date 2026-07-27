@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- Profile Picture Circle Base -->
+  <circle cx="128" cy="128" r="120" fill="#f8f9fa" stroke="#e2e8f0" stroke-width="8" />
+  
+  <!-- Vue's "V" Logo (Centered & Scaled) -->
+  <g transform="translate(51.2, 61.5) scale(0.6)">
+    <path fill="#41B883" d="M204.8,0 L256,0 L128,221.7 L0,0 L51.2,0 L128,133.1 Z" />
+    <path fill="#34495E" d="M204.8,0 L128,133.1 L51.2,0 L102.4,0 L128,44.3 L153.6,0 Z" />
+  </g>
+</svg>
