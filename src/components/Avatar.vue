@@ -452,9 +452,8 @@ function showImage() {
 </script>
 
 <style scoped>
-@import url("https://fonts.googleapis.com/css2?family=Domine:wght@700&display=swap");
 .avatar {
-  font-family: "Domine", serif;
+  font-family: Georgia, "Times New Roman", serif;
   color: white;
   background: navy;
   font-size: 14px;

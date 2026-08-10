@@ -1,3 +1,8 @@
+---
+title: AvatarGroup Component
+description: Props and events reference for AvatarGroup — stack avatars with overlap, max count, and a clickable +N overflow badge.
+---
+
 # AvatarGroup Component
 
 `<AvatarGroup />` stacks child `<Avatar />` components and can collapse extra items into a clickable `+N` badge.

@@ -1,3 +1,8 @@
+---
+title: Examples & Showcase
+description: Live, copy-pasteable examples of vue3-avatar — initials, status indicators, pixel-art identicons, and avatar groups.
+---
+
 # Examples & Showcase
 
 Explore all avatar features and variations.

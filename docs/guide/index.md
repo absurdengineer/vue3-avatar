@@ -1,3 +1,8 @@
+---
+title: Getting Started
+description: Install vue3-avatar and register the Avatar and AvatarGroup components in a Vue 3 or Nuxt app in under a minute.
+---
+
 # Getting Started with vue3-avatar
 
 `vue3-avatar` is a flexible avatar component for Vue 3 and Nuxt applications.
@@ -56,12 +61,4 @@ app.mount('#app');
 
 ## Nuxt 3 Support
 
-`vue3-avatar` is fully safe for Server-Side Rendering (SSR). In Nuxt 3, create a plugin at `plugins/avatar.ts`:
-
-```typescript
-import Avatar from 'vue3-avatar';
-
-export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.use(Avatar);
-});
-```
+`vue3-avatar` is fully safe for Server-Side Rendering (SSR) and ships an official Nuxt module — see the [Nuxt Module guide](/guide/nuxt-module) for the recommended one-line setup.

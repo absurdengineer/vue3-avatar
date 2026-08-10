@@ -6,6 +6,7 @@
 
 [![npm version](https://img.shields.io/npm/v/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
 [![Downloads](https://img.shields.io/npm/dt/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
+[![Bundle size](https://img.shields.io/bundlephobia/minzip/vue3-avatar?style=flat-square)](https://bundlephobia.com/package/vue3-avatar)
 [![License](https://img.shields.io/npm/l/vue3-avatar.svg?style=flat-square)](https://github.com/absurdengineer/vue3-avatar/blob/master/LICENSE)
 [![Docs](https://img.shields.io/badge/docs-live-brightgreen?style=flat-square)](https://vue3-avatar.vercel.app/)
 
@@ -131,11 +132,36 @@ After importing the component, use it in your template:
 
 ## Nuxt.js Support
 
-**Avatar Vue** v5.0 is fully SSR-safe and optimized for Nuxt.js 3+.
+**Avatar Vue** is fully SSR-safe and optimized for Nuxt.js 3+, and ships an official Nuxt module.
 
-### 1. Installation in Nuxt
+### 1. Installation in Nuxt (recommended: Nuxt module)
 
-Create a plugin file `plugins/avatar.ts`:
+Add `vue3-avatar/nuxt` to your `modules` array — `<Avatar>` and `<AvatarGroup>` are then auto-imported, no manual plugin registration needed:
+
+```typescript
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ["vue3-avatar/nuxt"],
+  vue3Avatar: {
+    defaults: {
+      size: 40,
+      autoContrast: true,
+    },
+  },
+});
+```
+
+```html
+<template>
+  <Avatar name="John Doe" />
+</template>
+```
+
+See the full [Nuxt module guide](https://vue3-avatar.vercel.app/guide/nuxt-module) for all module options.
+
+#### Manual plugin registration (fallback)
+
+If you'd rather register the plugin yourself — or are using Vue 3 without Nuxt — create a plugin file `plugins/avatar.ts`:
 
 ```typescript
 import { defineNuxtPlugin } from "#app";
