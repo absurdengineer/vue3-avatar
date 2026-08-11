@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.2.0] - 2026-08-10
+
+### Added
+
+- **Official Nuxt module** (`vue3-avatar/nuxt`): register `vue3-avatar` in a Nuxt `modules` array to get `Avatar` and `AvatarGroup` auto-imported, with global `defaults` configurable via the `vue3Avatar` config key. No more manual plugin registration required for Nuxt projects.
+- **First-class TypeScript declarations**: shipped `.d.ts` files for the core package and the Nuxt module, exposed through a proper `exports` map (`"."` and `"./nuxt"` subpaths), plus `nuxt.config.ts` autocompletion for the `vue3Avatar` key.
+- **CI**: GitHub Actions now builds and tests every push/PR (Node 18.x/20.x matrix), and tag-triggered releases build, test, publish to npm, and cut a GitHub Release automatically.
+- Issue and pull request templates for a more structured contribution flow.
+
+### Changed
+
+- Removed the external Google Fonts (`Domine`) network request from `Avatar.vue` in favor of a bundled system-font stack — the component now makes zero external network calls, improving CSP compatibility, SSR reliability, and offline use.
+
 ## [4.1.2] - 2026-07-27
 
 ### Accessibility

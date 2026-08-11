@@ -1,3 +1,8 @@
+---
+title: Avatar Component
+description: Full props, events, slots, and CSS variable reference for the vue3-avatar Avatar component.
+---
+
 # Avatar Component
 
 `<Avatar />` renders an accessible initials, image, or deterministic pixel-art avatar. Images fall back to the selected avatar variant if they fail to load.

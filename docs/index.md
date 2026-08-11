@@ -1,5 +1,7 @@
 ---
 layout: home
+title: vue3-avatar — Avatar Component for Vue 3 & Nuxt
+description: A lightweight, accessible, SSR-safe avatar component for Vue 3 and Nuxt with smart initials, pixel-art identicons, avatar groups, status badges, and zero dependencies.
 
 hero:
   name: "vue3-avatar"
@@ -17,6 +19,9 @@ hero:
       link: https://github.com/absurdengineer/vue3-avatar
 
 features:
+  - icon: 🔌
+    title: Official Nuxt Module
+    details: Add `vue3-avatar/nuxt` to your modules array — Avatar and AvatarGroup are auto-imported, no manual plugin setup.
   - icon: 🎨
     title: Smart Initials
     details: Automatically extracts initials from names with multi-word intelligence (e.g., "Tony Stark" → "TS").

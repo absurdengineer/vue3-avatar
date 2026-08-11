@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vue3-avatar.vercel.app/sitemap.xml
