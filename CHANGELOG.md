@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.2.1] - 2026-08-11
+
+### Fixed
+
+- `border: false` on initials/pixel-art avatars no longer removes their outline — per the documented behavior, the `border` prop only controls the native `<img>` border; initials and pixel avatars always keep theirs. Previously `avatarStyle` incorrectly applied the same conditional as the image, contradicting the README's props table.
+- Image border removal (`border: false`) now sets `border: 0px` instead of `none`, avoiding a shorthand-serialization inconsistency and matching the component's own test suite.
+
 ## [4.2.0] - 2026-08-10
 
 ### Added

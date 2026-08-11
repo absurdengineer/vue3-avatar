@@ -1,6 +1,6 @@
 {
   "name": "vue3-avatar",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "license": "MIT",
   "description": "A lightweight, fully customizable, accessible, and SSR-safe user avatar component for Vue 3 and Nuxt. Supports initials, custom images, pixel-art generation (identicons), groups with overflow, and auto-contrast text. Perfect for user profiles, team displays, and comment sections.",
   "main": "dist/avatar.ssr.js",

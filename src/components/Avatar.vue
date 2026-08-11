@@ -378,7 +378,7 @@ const imageStyle = computed(() => {
     justifyContent: "center",
     border: props.border
       ? `${size / 20}px solid ${displayBorderColor.value}`
-      : "none",
+      : "0px",
   };
   return Object.assign({}, defaultImageStyle, props.customAvatarStyle);
 });
@@ -394,7 +394,9 @@ const avatarStyle = computed(() => {
     display: props.inline && "inline-flex",
     borderRadius: shapeStyle.value.borderRadius,
     clipPath: shapeStyle.value.clipPath,
-    border: props.border && `${size / 20}px solid ${displayBorderColor.value}`,
+    // Initials/pixel-art avatars always keep their outline; `border` only
+    // toggles the native image border (see README props table).
+    border: `${size / 20}px solid ${displayBorderColor.value}`,
   };
   return Object.assign({}, defaultAvatarStyle, props.customAvatarStyle);
 });
