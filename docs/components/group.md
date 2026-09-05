@@ -18,6 +18,17 @@ description: Props and events reference for AvatarGroup — stack avatars with o
 | `layout` | `'stack' \| 'triangle'` | `'stack'` | Horizontal stack or a three-item triangle layout. |
 | `pointer` | `Boolean` | `false` | Uses a pointer cursor for the group. |
 | `onClick` | `Function` | — | Click callback for the group. |
+| `overflowTooltip` | `Boolean \| String` | — | Overrides the tooltip content on the `+N` badge, or disables it with `false`. |
+| `tooltipPlacement` | `String` | `'top'` | Placement for the overflow tooltip. |
+| `tooltipTheme` | `'dark' \| 'light' \| 'auto'` | `'dark'` | Theme for the overflow tooltip. |
+| `nativeTitle` | `Boolean` | `false` | Restores the v4 `title` attributes on the group and its badge. |
+
+## Slots
+
+| Slot | Scope | Description |
+| --- | --- | --- |
+| `default` | — | The child `<Avatar />` components. |
+| `overflow-tooltip` | `{ hiddenUsers, allUsers, overflowCount, hiddenNames }` | Replaces the body of the overflow badge's tooltip. |
 
 ## Events
 
@@ -38,3 +49,25 @@ description: Props and events reference for AvatarGroup — stack avatars with o
 ```
 
 Use `layout="triangle"` for a compact, three-item composition. When there are more children than the layout can show, the final visible item becomes the overflow badge.
+
+## Overflow tooltip
+
+The `+N` badge shows the hidden names in a styled tooltip. Up to v4 this was a
+native `title` attribute on both the badge and the group root; the group root no
+longer carries one, because each child avatar already has its own tooltip and
+listing every name again on the container only produced a duplicate.
+
+```vue
+<AvatarGroup :max="3">
+  <Avatar v-for="user in users" :key="user.id" :name="user.name" />
+
+  <template #overflow-tooltip="{ hiddenUsers, overflowCount }">
+    {{ overflowCount }} more: {{ hiddenUsers.map((u) => u.name).join(", ") }}
+  </template>
+</AvatarGroup>
+```
+
+The badge's `aria-label` already names the hidden users, so the tooltip is
+decoration for sighted users rather than a second description.
+
+See the [Tooltip](/components/tooltip) page for the shared options.

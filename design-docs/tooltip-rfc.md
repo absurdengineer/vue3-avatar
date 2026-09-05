@@ -1,5 +1,14 @@
 # RFC: Tooltip Implementation Strategy
 
+> **Superseded in v5.** This RFC chose Option 1 (the native `title` attribute)
+> for v4. v5 reverses that and implements Option 2: a built-in tooltip with its
+> own dependency-free positioning engine. The "cons" listed below were real, and
+> are addressed rather than dismissed — positioning lives in a pure, tested
+> module (`src/utils/position.js`), the tooltip teleports to `document.body`
+> instead of fighting z-index, and the ~4 kB gzipped cost is held in place by a
+> bundle-size budget in CI. `native-title` restores the behaviour described
+> here. See `docs/components/tooltip.md` and `docs/migration/v4-to-v5.md`.
+
 ## Context
 We need a way to show user details (e.g., Name) when hovering over an Avatar, especially useful in `AvatarGroup` where names are hidden.
 

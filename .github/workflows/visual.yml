@@ -1,0 +1,93 @@
+name: Visual
+
+# Kept separate from ci.yml on purpose: this job needs a browser, takes about a
+# minute, and its goldens are platform-specific. A failure here means pixels
+# moved, which is a different conversation from a failing unit test.
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      record:
+        description: Re-record the Linux goldens instead of asserting them
+        type: boolean
+        default: false
+
+jobs:
+  visual:
+    # Pinned rather than `ubuntu-latest`: these are pixel comparisons, and a
+    # runner image bump can change font rasterisation underneath the goldens.
+    runs-on: ubuntu-24.04
+    # The suite takes about 45s; anything near this is a hang, not slow pixels.
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # A whole missing platform directory is a bootstrap, not a regression.
+      # Failing every case would say nothing that this one line does not, so
+      # the run records the set and flags it loudly instead. A case added later
+      # against an existing set still fails, which is the point of the suite.
+      - name: Look for this platform's goldens
+        id: goldens
+        run: |
+          if [ -d tests/visual/__screenshots__/linux-x64 ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=No Linux goldens::tests/visual/__screenshots__/linux-x64 does not exist, so there is nothing to compare against. This run records the set and uploads it as visual-goldens-linux-x64. Review those images and commit them to turn the gate on."
+            {
+              echo "### Visual gate is not active yet"
+              echo
+              echo "No \`linux-x64\` reference images are committed, so this run **recorded** them"
+              echo "rather than asserting against them."
+              echo
+              echo "1. Download the \`visual-goldens-linux-x64\` artifact below."
+              echo "2. Look at the images."
+              echo "3. Commit them to \`tests/visual/__screenshots__/linux-x64/\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Compare against goldens
+        if: ${{ steps.goldens.outputs.present == 'true' && !inputs.record }}
+        run: npm run test:visual
+
+      - name: Record goldens
+        if: ${{ steps.goldens.outputs.present == 'false' || inputs.record }}
+        run: npm run test:visual:update
+
+      # Golden, actual and diff for every case that moved, so a reviewer can
+      # judge the change without reproducing it locally.
+      - name: Upload diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diff-${{ github.run_id }}
+          path: tests/visual/__diff__/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # On a `record` run this is the deliverable: download it and commit the
+      # contents to tests/visual/__screenshots__/linux-x64/. On a failure it is
+      # what the run measured, which is occasionally the faster way to look.
+      - name: Upload goldens
+        if: ${{ inputs.record || steps.goldens.outputs.present == 'false' || failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-goldens-linux-x64
+          path: tests/visual/__screenshots__/linux-x64/
+          if-no-files-found: warn
+          retention-days: 14
