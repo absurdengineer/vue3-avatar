@@ -23,7 +23,7 @@ See [the migration guide](https://vue3-avatar.absurdengineer.com/migration/v4-to
 - `computePosition`, `useFloating`, `useTooltip`, `AvatarTooltip` and `PLACEMENTS` are exported for building your own floating elements.
 - New CSS variables: `--va-status-color`, `--va-status-size`, `--va-badge-bg`, `--va-badge-color`, plus the settable `--va-focus-ring`, `--va-ring-color`, `--va-skeleton-bg`, `--va-skeleton-shimmer`, `--va-edit-overlay-bg` and `--va-edit-overlay-color`.
 - CI now type-checks the hand-written declarations against a fixture that instantiates every prop, and enforces a gzipped bundle-size budget.
-- A separate `Visual` workflow runs the pixel suite on every pull request and uploads golden/actual/diff artifacts when it fails. Its `workflow_dispatch` `record` input bootstraps the Linux goldens.
+- A separate `Visual` workflow runs the pixel suite on every pull request and uploads golden/actual/diff artifacts when it fails. On a platform with no committed reference images it records the set and says so, rather than failing every case over something one line explains.
 
 ### Fixed
 

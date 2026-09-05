@@ -35,12 +35,36 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      # A whole missing platform directory is a bootstrap, not a regression.
+      # Failing every case would say nothing that this one line does not, so
+      # the run records the set and flags it loudly instead. A case added later
+      # against an existing set still fails, which is the point of the suite.
+      - name: Look for this platform's goldens
+        id: goldens
+        run: |
+          if [ -d tests/visual/__screenshots__/linux-x64 ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=No Linux goldens::tests/visual/__screenshots__/linux-x64 does not exist, so there is nothing to compare against. This run records the set and uploads it as visual-goldens-linux-x64. Review those images and commit them to turn the gate on."
+            {
+              echo "### Visual gate is not active yet"
+              echo
+              echo "No \`linux-x64\` reference images are committed, so this run **recorded** them"
+              echo "rather than asserting against them."
+              echo
+              echo "1. Download the \`visual-goldens-linux-x64\` artifact below."
+              echo "2. Look at the images."
+              echo "3. Commit them to \`tests/visual/__screenshots__/linux-x64/\`."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Compare against goldens
-        if: ${{ !inputs.record }}
+        if: ${{ steps.goldens.outputs.present == 'true' && !inputs.record }}
         run: npm run test:visual
 
-      - name: Re-record goldens
-        if: ${{ inputs.record }}
+      - name: Record goldens
+        if: ${{ steps.goldens.outputs.present == 'false' || inputs.record }}
         run: npm run test:visual:update
 
       # Golden, actual and diff for every case that moved, so a reviewer can
@@ -58,7 +82,7 @@ jobs:
       # contents to tests/visual/__screenshots__/linux-x64/. On a failure it is
       # what the run measured, which is occasionally the faster way to look.
       - name: Upload goldens
-        if: ${{ inputs.record || failure() }}
+        if: ${{ inputs.record || steps.goldens.outputs.present == 'false' || failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: visual-goldens-linux-x64

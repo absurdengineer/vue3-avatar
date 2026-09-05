@@ -99,17 +99,23 @@ job fails, so a change can be reviewed without reproducing it locally.
 
 ### Recording the Linux goldens
 
-Only `darwin-arm64` is committed today, so the first CI run for a case records
-`linux-x64` and fails, exactly as it does locally. To bootstrap the set:
+Only `darwin-arm64` is committed today. A whole missing platform directory is a
+bootstrap rather than a regression, so the job detects it, **records** the set
+instead of asserting against it, and flags that the gate is not live yet with a
+warning annotation and a job summary. Failing 240 cases would say nothing that
+one line does not.
 
-1. Run the **Visual** workflow manually (`workflow_dispatch`) with **record**
-   checked.
-2. Download the `visual-goldens-linux-x64` artifact from that run.
-3. Commit its contents to `tests/visual/__screenshots__/linux-x64/` after
-   looking at them — an unreviewed reference is not a reference.
+The first pull-request run therefore goes green and leaves the images attached
+to it. To turn the gate on:
 
-From then on the job asserts rather than records. Re-run it the same way after
-any deliberate visual change, or after a Playwright upgrade: a new browser
+1. Open that run and download the `visual-goldens-linux-x64` artifact.
+2. Look at the images. An unreviewed reference is not a reference — that is the
+   whole technique.
+3. Commit them to `tests/visual/__screenshots__/linux-x64/`.
+
+From then on the job asserts, and a case added later without a golden fails the
+way it does locally. Re-record with the **Visual** workflow's manual `record`
+input after a deliberate visual change or a Playwright upgrade — a new browser
 rasterises differently and invalidates the whole set.
 
 Recording locally for Linux works too, if you have Docker:
