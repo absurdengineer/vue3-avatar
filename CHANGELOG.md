@@ -22,7 +22,7 @@ See [the migration guide](https://vue3-avatar.absurdengineer.com/migration/v4-to
 - **Interaction:** `as` (`div`, `button`, `a`), `href`, `target`, `rel`, `disabled`, `selected` (rendered as `aria-pressed`), and an `editable` overlay with optional file-input wiring via `accept`. New `@edit` and `@file-select` events and an `edit-overlay` slot.
 - `computePosition`, `useFloating`, `useTooltip`, `AvatarTooltip` and `PLACEMENTS` are exported for building your own floating elements.
 - New CSS variables: `--va-status-color`, `--va-status-size`, `--va-badge-bg`, `--va-badge-color`, plus the settable `--va-focus-ring`, `--va-ring-color`, `--va-skeleton-bg`, `--va-skeleton-shimmer`, `--va-edit-overlay-bg` and `--va-edit-overlay-color`.
-- CI now type-checks the hand-written declarations against a fixture that instantiates every prop, and enforces a gzipped bundle-size budget.
+- CI now type-checks the hand-written declarations against a fixture that instantiates every prop, and enforces a gzipped bundle-size budget. The matrix moved to Node 20, 22 and 24: the toolchain needs it, and on Node 18 Vitest hangs rather than reporting an unsupported version. Both workflows carry a timeout so a hang costs minutes rather than hours.
 - A separate `Visual` workflow runs the pixel suite on every pull request and uploads golden/actual/diff artifacts when it fails. On a platform with no committed reference images it records the set and says so, rather than failing every case over something one line explains.
 
 ### Fixed

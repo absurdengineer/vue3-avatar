@@ -20,6 +20,8 @@ jobs:
     # Pinned rather than `ubuntu-latest`: these are pixel comparisons, and a
     # runner image bump can change font rasterisation underneath the goldens.
     runs-on: ubuntu-24.04
+    # The suite takes about 45s; anything near this is a hang, not slow pixels.
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4

@@ -8,9 +8,18 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    # A hung job should cost minutes, not the six hours GitHub allows by
+    # default. The whole matrix leg runs in well under two.
+    timeout-minutes: 15
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [18.x, 20.x]
+        # The published package is browser code and has no Node floor of its
+        # own, but the toolchain does: Vitest 4 needs ^20 || ^22 || >=24 and
+        # Vite needs ^20.19 || >=22.12. On Node 18 Vitest does not error, it
+        # hangs at the RUN banner forever, which is how this matrix used to
+        # burn hours before timing out.
+        node-version: [20.x, 22.x, 24.x]
     steps:
       - uses: actions/checkout@v4
 

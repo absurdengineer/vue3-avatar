@@ -476,6 +476,13 @@ The source is TypeScript throughout — utilities, composables, and SFCs using
 **emitted from source** by `vue-tsc`, so the public API cannot drift from the
 implementation. `src/types.ts` holds the exported type surface.
 
+### Node version
+
+The published package is browser code and imposes no Node version of its own.
+The **toolchain** does: Vitest 4 needs `^20 || ^22 || >=24` and Vite needs
+`^20.19 || >=22.12`. On Node 18 Vitest does not fail with a version error — it
+hangs at the `RUN` banner indefinitely. Develop and run CI on Node 20 or later.
+
 ### Scripts
 
 | Command | What it does |
