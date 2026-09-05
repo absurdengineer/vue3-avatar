@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0] - 2026-09-05
+
+### Breaking
+
+- **The native `title` attribute is gone.** Avatars no longer render `title="{name}"`, and `AvatarGroup` no longer renders `title` on the group root or the `+N` badge. A styled, collision-aware tooltip replaces it. Set `native-title` to restore the old attribute (which also disables the styled tooltip), or `:tooltip="false"` for neither. The group root no longer has a tooltip listing every name at all — each child avatar already has its own, so the container version was a duplicate.
+- **Status colours changed** from CSS keywords to hexadecimal tokens: `green` → `#22c55e`, `orange` → `#f59e0b`, `red` → `#ef4444`, `grey` → `#9ca3af`. An unknown `status` now falls back to the offline grey rather than the busy red. The keywords sit at wildly different luminances, which made the white ring around the indicator read inconsistently.
+- **The status indicator is inset from the corner** by an amount that depends on `shape`, so it sits on the avatar's outline rather than in the empty corner of its bounding box. Squares are unchanged; a 40px circle moves in by 3px. Use `custom-status-style` to pin the old offsets.
+
+See [the migration guide](https://vue3-avatar.absurdengineer.com/migration/v4-to-v5) for the full details.
+
+### Added
+
+- **Tooltips.** A dependency-free positioning engine with twelve placements, flip and shift collision handling, and an arrow that keeps pointing at the avatar after a shift. Renders through a `<Teleport>` so it escapes `overflow: hidden` ancestors. Props: `tooltip`, `tooltipPlacement`, `tooltipTrigger`, `tooltipDelay`, `tooltipHideDelay`, `tooltipOffset`, `tooltipArrow`, `tooltipTheme`, `tooltipInteractive`, `tooltipDisabled`, `nativeTitle`. New `tooltip` slot for rich hover cards, and an `overflow-tooltip` slot on `AvatarGroup`.
+- Hover, keyboard-focus, click and long-press triggers, with open/close delays and `Escape` to close. `aria-describedby` is wired only when the tooltip says something the accessible label does not, so nothing is announced twice.
+- **Status:** `statusColor`, `statusColors` (also accepted in the global config), `statusSize`, `statusLabel`, and `statusPulse`. `status` accepts custom names resolved through `statusColors`.
+- **Badges:** `badge`, `badgeVariant`, `badgeMax` (default `999`), `badgeMaxLength`, `badgePosition`, `badgeColor`, `badgeTextColor`, `badgeLabel`, `customBadgeStyle`, and a `badge` slot. The badge is `aria-hidden` with its meaning folded into the avatar's label.
+- **Images:** `fallbackSrc` accepts an ordered chain of sources tried before giving up; a loading `skeleton`; `retina` for a derived `@2x` srcset; and `srcset`, `sizes`, `crossorigin`, `referrerpolicy` and `decoding` passthrough. New `@fallback` event fires between attempts — `@error` now fires only once every source has failed.
+- **Interaction:** `as` (`div`, `button`, `a`), `href`, `target`, `rel`, `disabled`, `selected` (rendered as `aria-pressed`), and an `editable` overlay with optional file-input wiring via `accept`. New `@edit` and `@file-select` events and an `edit-overlay` slot.
+- `computePosition`, `useFloating`, `useTooltip`, `AvatarTooltip` and `PLACEMENTS` are exported for building your own floating elements.
+- New CSS variables: `--va-status-color`, `--va-status-size`, `--va-badge-bg`, `--va-badge-color`, plus the settable `--va-focus-ring`, `--va-ring-color`, `--va-skeleton-bg`, `--va-skeleton-shimmer`, `--va-edit-overlay-bg` and `--va-edit-overlay-color`.
+- CI now type-checks the hand-written declarations against a fixture that instantiates every prop, and enforces a gzipped bundle-size budget.
+- A separate `Visual` workflow runs the pixel suite on every pull request and uploads golden/actual/diff artifacts when it fails. Its `workflow_dispatch` `record` input bootstraps the Linux goldens.
+
+### Fixed
+
+- Changing `imageSrc` after a load failure left the avatar permanently on initials. The image state now resets when the source changes.
+- The tooltip's `data-placement` attribute reported the *requested* placement rather than the resolved one, so it lied whenever the tooltip flipped away from a viewport edge — and any CSS keyed on it was wrong. Caught by the new visual suite.
+- A badge holding a long label ("Promotional") grew to 166% of the avatar's width and ran off the far side, straight across the initials — it is corner-anchored and grows inwards, and nothing capped it. Badge content is now capped: non-numeric content is trimmed to `badgeMaxLength` (default 3) letters, the badge box is capped at the avatar's own width, and a CSS ellipsis backstops wide glyphs. Override with `badgeMaxLength` or `customBadgeStyle: { maxWidth }`.
+- Badge type is smaller and the badge flatter (`size / 5.5` and `size / 3.6`), which reads better as a corner marker.
+- Badges now use their own corner inset, roughly half the status dot's, so they sit further out and are allowed to overhang the avatar's edge. A round dot reads best tucked onto the outline; a wide pill pulled in by the same amount drifts towards the middle of the face.
+- The `hexagon` shape was drawn as tall as it was wide, which stretched it: a regular hexagon with points to the left and right is only `sqrt(3)/2` as tall as it is wide. The clip path now uses those proportions, so the shape reads wider than it is tall and spans nearly the full width of the avatar box instead of being inset on both axes.
+- `AvatarGroup` with `layout="triangle"` and `max={1}` rendered every child instead of collapsing them: the overflow guard used a truthiness check, and the triangle layout can legitimately compute an effective maximum of `0`.
+- A `tooltip-trigger` containing `click` silently disabled the avatar's own `onClick` and `@activate`: the tooltip's listener was spread over the root last and replaced them. Colliding handlers are now composed rather than overwritten, so a click both activates the avatar and toggles the tooltip.
+- Tooltips were positioned against the nearest `overflow: hidden` ancestor, which re-imposed the very constraint the `<Teleport>` exists to escape — inside a narrow clipped container the bubble was pinned to that container's edge, tens of pixels off the avatar, while the viewport had room to spare. Only real scroll boxes (`auto`, `scroll`, `overlay`) are boundaries now, and the boundary is intersected with the viewport so a scroll box taller than the screen cannot push a tooltip below the fold.
+- An `editable` avatar rendered its edit button inside `role="img"`, whose children are presentational — the only control for changing the picture was invisible to screen readers. Such an avatar now uses `role="group"`.
+- `as="button"` or `as="a"` combined with `editable` emitted a `<button>` nested inside a button or a link, which browsers reparent. The overlay is decoration on those roots and the root's own activation emits `edit`.
+- The hidden file input behind `accept` was a keyboard tab stop; it is now `tabindex="-1"` and `aria-hidden`.
+- Choosing the same file twice emitted `file-select` only once, because the input's value was never cleared — re-picking after a cancelled crop did nothing.
+- `AvatarGroup`'s focusable root had no focus ring, the same defect fixed on `Avatar`; and its key handling never received `Avatar`'s case and `keyCode` normalisation, so the environments that broke one would have broken the other.
+- Development warnings never reached anyone: `process.env.NODE_ENV` was replaced with `"production"` in every build, so guarded warnings were dead-stripped from the published bundles. Only the IIFE build — loaded from a CDN with no bundler behind it — bakes the value in now.
+- The avatar had no focus ring at all — only `AvatarGroup`'s overflow button did. Interactive avatars now show one, styleable through `--va-focus-ring`.
+
+### Changed
+
+- Animations respect `prefers-reduced-motion: reduce`, including the image fade, the status pulse, the skeleton shimmer and the tooltip transition.
+- The shared global-config resolver moved to `src/utils/config.ts` as `createConfigResolver`; it was previously duplicated in both components.
+- **The source is now TypeScript.** Every util, composable, entry point and SFC (`<script setup lang="ts">`) is typed, and `dist/types` is now *emitted from source* by `vue-tsc` rather than hand-written — the public API can no longer drift from the implementation. `src/types.ts` is the single source of truth for the exported types.
+- Package `types` now resolves to `./dist/types/entry.esm.d.ts` (was `./dist/types/index.d.ts`), and the Nuxt subpath to `./dist/types/nuxt-module.d.ts`. Consumers importing from `"vue3-avatar"` are unaffected.
+- Note for anyone deep-importing `vue3-avatar/src/components/*.vue`: those files now use `lang="ts"` and require a TypeScript-aware build. Import from the package entry instead.
+
+### Testing
+
+- **Visual regression suite** (`npm run test:visual`): 259 assertions covering 242 committed reference images, rendered in real Chromium and compared pixel by pixel with `pixelmatch`, plus exact-colour probes for the documented status, badge and tooltip palettes. Covers shape x variant, status x corner x shape, badge variant x corner, all 8 pixel themes, all 12 tooltip placements, group layouts, and interaction states. Goldens are stored per platform; failures write the golden, the actual render and a highlighted diff.
+- **Permutation suite** (`tests/permutations.spec.ts`): enumerable props are exhausted, and 20 boolean flags are covered pairwise — all-pairs coverage in a couple of dozen mounts rather than the 1,048,576 the full product would need.
+- **Regression suite** (`tests/regressions.spec.ts`) and a `useFloating` unit spec: one test per defect found in the pre-release review, each written against a case that was reproduced by hand first.
+- 416 unit tests in jsdom alongside the 259 pixel comparisons.
+- VS Code launch configurations for every task, including running and re-recording the visual suite.
+
 ## [4.2.1] - 2026-08-11
 
 ### Fixed

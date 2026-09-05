@@ -1,0 +1,137 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Test: all (jsdom)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["--run"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/vitest/**"]
+    },
+    {
+      "name": "Test: watch (jsdom)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/vitest/**"]
+    },
+    {
+      "name": "Test: current file",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["--run", "${relativeFile}"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/vitest/**"]
+    },
+    {
+      "name": "Test: current file (visual)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": [
+        "--run",
+        "--config",
+        "vitest.visual.config.mts",
+        "${relativeFile}"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/vitest/**"]
+    },
+    {
+      "name": "Test: visual (all)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["--run", "--config", "vitest.visual.config.mts"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/vitest/**"]
+    },
+    {
+      "name": "Test: visual (headed browser)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["--run", "--config", "vitest.visual.config.mts"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PWDEBUG": "0",
+        "VISUAL_HEADED": "1"
+      },
+      "console": "integratedTerminal",
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/vitest/**"]
+    },
+    {
+      "name": "Test: visual (re-record goldens)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/vitest/vitest.mjs",
+      "args": ["--run", "--config", "vitest.visual.config.mts"],
+      "cwd": "${workspaceFolder}",
+      "env": { "UPDATE_SNAPSHOTS": "1" },
+      "console": "integratedTerminal",
+      "smartStep": true,
+      "skipFiles": ["<node_internals>/**", "**/node_modules/vitest/**"]
+    },
+    {
+      "name": "Typecheck",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/vue-tsc",
+      "args": ["--noEmit", "-p", "tsconfig.json"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Build",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "build"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Docs: dev server",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "docs:dev"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "serverReadyAction": {
+        "pattern": "Local:\\s+(https?://\\S+)",
+        "uriFormat": "%s",
+        "action": "openExternally"
+      },
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Verify: typecheck + tests + visual",
+      "configurations": [
+        "Typecheck",
+        "Test: all (jsdom)",
+        "Test: visual (all)"
+      ],
+      "stopAll": true
+    }
+  ]
+}

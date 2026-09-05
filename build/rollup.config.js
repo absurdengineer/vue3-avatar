@@ -26,7 +26,7 @@ const argv = minimist(process.argv.slice(2));
 const projectRoot = path.resolve(__dirname, '..');
 
 const baseConfig = {
-  input: 'src/entry.js',
+  input: 'src/entry.ts',
   plugins: {
     preVue: [
       alias({
@@ -38,8 +38,14 @@ const baseConfig = {
         ],
       }),
     ],
+    // Only the IIFE bundle needs this baked in: it is loaded straight from a
+    // CDN with no bundler behind it, so `process` would be undefined at
+    // runtime. The ESM and CJS builds leave the expression alone so the
+    // consumer's bundler resolves it and development warnings actually reach
+    // people in development.
     replace: {
       'process.env.NODE_ENV': JSON.stringify('production'),
+      preventAssignment: true,
     },
     vue: {
     },
@@ -63,6 +69,11 @@ const baseConfig = {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.vue'],
       babelHelpers: 'bundled',
     },
+    // Shared across every format: strip TypeScript before preset-env runs.
+    typescriptPreset: [
+      '@babel/preset-typescript',
+      { allExtensions: true, isTSX: false, onlyRemoveTypeImports: true },
+    ],
   },
 };
 
@@ -87,7 +98,7 @@ const buildFormats = [];
 if (!argv.format || argv.format === 'es') {
   const esConfig = {
     ...baseConfig,
-    input: 'src/entry.esm.js',
+    input: 'src/entry.esm.ts',
     external,
     output: {
       file: 'dist/avatar.esm.js',
@@ -95,13 +106,13 @@ if (!argv.format || argv.format === 'es') {
       exports: 'named',
     },
     plugins: [
-      replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
       vue(baseConfig.plugins.vue),
       ...baseConfig.plugins.postVue,
       babel({
         ...baseConfig.plugins.babel,
         presets: [
+          baseConfig.plugins.typescriptPreset,
           [
             '@babel/preset-env',
             {
@@ -129,11 +140,13 @@ if (!argv.format || argv.format === 'cjs') {
       globals,
     },
     plugins: [
-      replace(baseConfig.plugins.replace),
       ...baseConfig.plugins.preVue,
       vue(baseConfig.plugins.vue),
       ...baseConfig.plugins.postVue,
-      babel(baseConfig.plugins.babel),
+      babel({
+        ...baseConfig.plugins.babel,
+        presets: [baseConfig.plugins.typescriptPreset],
+      }),
     ],
   };
   buildFormats.push(umdConfig);
@@ -156,7 +169,10 @@ if (!argv.format || argv.format === 'iife') {
       ...baseConfig.plugins.preVue,
       vue(baseConfig.plugins.vue),
       ...baseConfig.plugins.postVue,
-      babel(baseConfig.plugins.babel),
+      babel({
+        ...baseConfig.plugins.babel,
+        presets: [baseConfig.plugins.typescriptPreset],
+      }),
       terser({
         output: {
           ecma: 5,

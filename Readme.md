@@ -4,6 +4,9 @@
 
 **📖 [Read the Documentation & Try the Interactive Playground](https://vue3-avatar.vercel.app/)**
 
+**🆕 v5 is out** — a real tooltip engine, badges, image fallback chains, `as`/`disabled`/`selected`/`editable`, and a TypeScript source.
+[What's new](https://vue3-avatar.vercel.app/whats-new) · [Migrating from v4](https://vue3-avatar.vercel.app/migration/v4-to-v5)
+
 [![npm version](https://img.shields.io/npm/v/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
 [![Downloads](https://img.shields.io/npm/dt/vue3-avatar.svg?style=flat-square)](https://www.npmjs.com/package/vue3-avatar)
 [![Bundle size](https://img.shields.io/bundlephobia/minzip/vue3-avatar?style=flat-square)](https://bundlephobia.com/package/vue3-avatar)
@@ -41,7 +44,10 @@ Works with Tailwind CSS, UnoCSS, Headless UI, or any setup that doesn't include 
 - 👥 **Avatar Groups**: Easily stack avatars for teams with `+N` overflow badges.
 - 🌗 **Auto-Contrast**: Automatically adjusts text color (black/white) based on background luminance.
 - ♿ **Accessible**: Built with a11y in mind (ARIA roles, keyboard support).
-- 🟢 **Status Indicators**: Built-in support for online/offline/busy status badges.
+- 🟢 **Status Indicators**: Built-in presence dots with custom statuses, sizes, colours, and an optional pulse.
+- 💬 **Built-in Tooltips**: Styled, collision-aware tooltips with twelve placements — no Popper or Floating UI dependency.
+- 🔴 **Notification Badges**: Counts, dots, and custom badge content in any corner.
+- 🛡️ **Resilient Images**: Ordered fallback chains, a loading skeleton, and retina `srcset` support.
 - ☁️ **SSR & Nuxt Ready**: Safe for server-side rendering with no hydration mismatches.
 
 ## Examples
@@ -218,8 +224,6 @@ Colors and Pixel patterns are generated deterministically based on the `name` pr
 | `dark` / `gradient`                       | Boolean            | `false`          | Use the dark palette or a name-based gradient.                                  |
 | `autoContrast`                            | Boolean            | `false`          | Choose black or white text for a hexadecimal background colour.                 |
 | `border` / `borderColor`                  | Boolean / String   | `true` / `white` | Control the native image border; initials and pixel avatars keep their outline. |
-| `status`                                  | String             | —                | `online`, `away`, `offline`, or `busy`.                                         |
-| `statusPosition`                          | String             | `bottom-right`   | `top-right`, `top-left`, `bottom-right`, or `bottom-left`.                      |
 | `alt`                                     | String             | derived          | Accessible label; defaults to `Avatar of {name}`.                               |
 | `loading` / `transition`                  | String / Boolean   | `lazy` / `true`  | Native image loading and image fade-in behaviour.                               |
 | `interactive`                             | Boolean            | `false`          | Enables keyboard activation and emits `activate`.                               |
@@ -228,6 +232,78 @@ Colors and Pixel patterns are generated deterministically based on the `name` pr
 | `sameBorder` / `useTextColorForBorder`    | Boolean            | `false`          | Status-border and avatar-border colour options.                                 |
 | `useLegacyColors`                         | Boolean            | `false`          | Uses the legacy `vue-avatar` palette.                                           |
 
+### Tooltip props
+
+Full reference in the [tooltip documentation](https://vue3-avatar.absurdengineer.com/components/tooltip).
+
+| Property             | Type                      | Default        | Description                                                                                     |
+| -------------------- | ------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
+| `tooltip`            | String / Boolean / Object | —              | Content. Unset uses `name`; `false` disables it; an object supplies inline overrides.           |
+| `tooltipPlacement`   | String                    | `top`          | `top`, `bottom`, `left`, `right`, each optionally suffixed `-start` or `-end`.                  |
+| `tooltipTrigger`     | String                    | `hover focus`  | Space-separated combination of `hover`, `focus`, `click`, `manual`.                             |
+| `tooltipDelay` / `tooltipHideDelay` | Number     | `200` / `100`  | Open and close delays in milliseconds.                                                          |
+| `tooltipOffset`      | Number                    | `8`            | Gap between the avatar and the tooltip.                                                         |
+| `tooltipArrow`       | Boolean                   | `true`         | Shows the arrow.                                                                                |
+| `tooltipTheme`       | String                    | `dark`         | `dark`, `light`, or `auto` (follows `prefers-color-scheme`).                                    |
+| `tooltipInteractive` | Boolean                   | `false`        | Keeps the tooltip open while the pointer is inside it.                                          |
+| `tooltipDisabled`    | Boolean                   | `false`        | Runtime kill switch, separate from `tooltip: false`.                                            |
+| `nativeTitle`        | Boolean                   | `false`        | Restores the v4 `title` attribute and disables the styled tooltip.                              |
+
+### Status props
+
+| Property         | Type                     | Default        | Description                                                                                  |
+| ---------------- | ------------------------ | -------------- | -------------------------------------------------------------------------------------------- |
+| `status`         | String                   | —              | `online`, `away`, `offline`, `busy`, or any key present in `statusColors`.                    |
+| `statusPosition` | String                   | `bottom-right` | `top-right`, `top-left`, `bottom-right`, or `bottom-left`.                                   |
+| `statusColor`    | String                   | —              | Overrides the colour for this avatar, whatever the status is.                                |
+| `statusColors`   | Object                   | `{}`           | Extra or replacement colours, merged over the built-in four. Also accepted in the global config. |
+| `statusSize`     | String / Number          | `md`           | `sm`, `md`, `lg`, or explicit pixels.                                                        |
+| `statusLabel`    | String                   | —              | Replaces "User is {status}" in the accessible label.                                         |
+| `statusPulse`    | Boolean                  | `false`        | Animates a pulsing ring. Suppressed under `prefers-reduced-motion`.                          |
+| `sameBorder`     | Boolean                  | `false`        | Makes the status indicator use the avatar border colour.                                     |
+
+### Badge props
+
+| Property                          | Type            | Default             | Description                                                                          |
+| --------------------------------- | --------------- | ------------------- | ------------------------------------------------------------------------------------ |
+| `badge`                           | String / Number | —                   | Badge content. Renders the badge when set.                                           |
+| `badgeVariant`                    | String          | `count`             | `count`, `dot`, or `icon`. `dot` needs no `badge` value.                             |
+| `badgeMax`                        | Number          | `999`               | Counts above this render as `{max}+`. Digit strings are clamped like numbers.        |
+| `badgeMaxLength`                  | Number          | `3`                 | Letters kept in a non-numeric badge. `"Promotional"` renders as `"Pro"`.             |
+| `badgePosition`                   | String          | `top-right`         | Same four corners as `statusPosition`.                                               |
+| `badgeColor` / `badgeTextColor`   | String          | `#ef4444` / derived | Given only a hexadecimal background, the text colour is chosen for contrast.         |
+| `badgeLabel`                      | String          | derived             | Wording for the badge in the accessible label.                                       |
+| `customBadgeStyle`                | Object          | `{}`                | Inline style overrides for the badge, including `maxWidth` to allow a wider label.    |
+
+Badge content is capped so a corner marker stays one: counts above `badgeMax`
+render as `999+`, and other content is trimmed to `badgeMaxLength` letters — the
+same three-character budget the initials use. The badge is also capped at the
+avatar's own width, so a long label cannot run across the face.
+
+### Image props
+
+| Property           | Type              | Default | Description                                                                                       |
+| ------------------ | ----------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `fallbackSrc`      | String / String[] | —       | Sources tried in order when `imageSrc` fails, before falling back to initials or pixel art.       |
+| `skeleton`         | Boolean           | `true`  | Shimmer placeholder while the image loads. Rendered only after mount, so SSR output stays stable. |
+| `retina`           | Boolean           | `false` | Derives an `@2x` `srcset` from `imageSrc` when no explicit `srcset` is set.                        |
+| `srcset` / `sizes` | String            | —       | Passed through to the `<img>`. An explicit `srcset` wins over `retina`.                            |
+| `crossorigin`      | String            | —       | `anonymous` or `use-credentials`.                                                                  |
+| `referrerpolicy`   | String            | —       | Passed through to the `<img>`.                                                                     |
+| `decoding`         | String            | `async` | `async`, `sync`, or `auto`.                                                                        |
+
+### Interaction props
+
+| Property                   | Type    | Default            | Description                                                                                    |
+| -------------------------- | ------- | ------------------ | ----------------------------------------------------------------------------------------------- |
+| `as`                       | String  | `div`              | `div`, `button`, or `a`. Native elements bring real semantics and keyboard handling.            |
+| `href` / `target` / `rel`  | String  | —                  | Used when `as="a"`. `target="_blank"` adds `rel="noopener noreferrer"` unless `rel` is set.     |
+| `disabled`                 | Boolean | `false`            | Blocks activation, dims the avatar, and sets `aria-disabled` or the native `disabled`.          |
+| `selected`                 | Boolean | —                  | Opt-in toggle state, rendered as `aria-pressed`. Leave unset for avatars that are not toggles.  |
+| `editable`                 | Boolean | `false`            | Adds an overlay for changing the picture. Emits `edit`. Decorative on `button`/`a` roots.       |
+| `accept`                   | String  | —                  | With `editable`, wires a hidden file input and emits `file-select`.                              |
+| `editLabel`                | String  | `Change picture`   | Accessible label for the edit overlay.                                                          |
+
 ## Events
 
 | Event      | Arguments | Description                                                                 |
@@ -235,15 +311,21 @@ Colors and Pixel patterns are generated deterministically based on the `name` pr
 | `error`    | `event`   | Emitted when `imageSrc` fails to load                                       |
 | `load`     | `event`   | Emitted when `imageSrc` successfully loads                                  |
 | `activate` | `event`   | Emitted when an interactive avatar is clicked or activated with Enter/Space |
+| `fallback` | `{ failedSrc, nextSrc, remaining, event }` | Emitted when an image fails and another source remains. `error` fires only once the chain is exhausted |
+| `edit`     | `event`   | Emitted when the `editable` overlay is activated                            |
+| `file-select` | `{ files, event }` | Emitted when a file is chosen through the `accept` file input     |
 
 ## Slots
 
 | Slot          | Description                                                                                                             |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `image`       | **NEW (v4.1)** Scoped slot for custom image components (e.g. `<NuxtImg>`). Provides `{ src, alt, size, style, class }`. |
-| `placeholder` | **NEW (v4.1)** Scoped slot for custom placeholder when no name/image is present. Provides `{ size, style }`.            |
-| `status`      | Custom status indicator content. Overrides default status rendering but keeps positioning.                              |
-| `overlay`     | Custom overlay content (badges, icons). Positioned relative to container.                                               |
+| `image`         | Scoped slot for custom image components (e.g. `<NuxtImg>`). Provides `{ src, srcset, sizes, alt, size, style, class }`. `src` is the current link in the fallback chain. |
+| `placeholder`   | Scoped slot for a custom placeholder when no name/image is present. Provides `{ size, style }`.                        |
+| `status`        | Custom status indicator content. Overrides default status rendering but keeps positioning.                             |
+| `badge`         | **NEW (v5)** Custom badge content. Keeps the badge's positioning and shape.                                            |
+| `overlay`       | Custom overlay content (badges, icons). Positioned relative to container.                                              |
+| `tooltip`       | **NEW (v5)** Rich tooltip body. Provides `{ nameValue, initials, status, imageSrc }`.                                  |
+| `edit-overlay`  | **NEW (v5)** Replaces the camera icon on the `editable` overlay.                                                       |
 
 ## CSS Variables
 
@@ -257,6 +339,28 @@ The component exposes CSS variables on the root element for easier theming:
 --va-radius
 --va-clip-path
 --va-font-size
+--va-status-color
+--va-status-size
+--va-badge-bg
+--va-badge-color
+```
+
+These are read by the component and can be set by you:
+
+```css
+--va-focus-ring          /* focus outline colour */
+--va-ring-color          /* ring shown when `selected` */
+--va-skeleton-bg
+--va-skeleton-shimmer
+--va-edit-overlay-bg
+--va-edit-overlay-color
+--va-tooltip-bg
+--va-tooltip-color
+--va-tooltip-radius
+--va-tooltip-font-size
+--va-tooltip-padding
+--va-tooltip-shadow
+--va-tooltip-z-index
 ```
 
 ## AvatarGroup (New in v4)
@@ -309,12 +413,13 @@ You can also pass props to individual `Avatar` components within the group. For 
 
 ## Accessibility
 
-v4.0.0 focuses heavily on accessibility:
-
-- **Roles:** Renders as `role="img"` by default, or `role="button"` if `interactive` is true.
+- **Roles:** Renders as `role="img"` by default, or `role="button"` if `interactive` is true. Use `as="button"` or `as="a"` to get real native semantics instead.
 - **Labels:** Automatically generates aria-labels from `alt` or `name` props.
-- **Keyboard:** When `interactive` is true, supports `Tab` navigation and `Enter`/`Space` activation.
-- **Status:** Status text is included in the accessible label (e.g., "Avatar of John Doe. User is online").
+- **Keyboard:** When `interactive` is true, supports `Tab` navigation and `Enter`/`Space` activation. A focus ring is shown on `:focus-visible`, styleable through `--va-focus-ring`.
+- **Status:** Status text is included in the accessible label (e.g., "Avatar of John Doe. User is online"), or replaced entirely by `statusLabel`.
+- **Badges:** The badge is `aria-hidden` and its meaning is folded into the avatar's label, so it is announced once rather than twice.
+- **Tooltips:** Rendered as `role="tooltip"` and referenced with `aria-describedby` only when they say something the label does not. `Escape` closes an open tooltip.
+- **Motion:** The image fade, status pulse, skeleton shimmer and tooltip transition are all disabled under `prefers-reduced-motion: reduce`.
 
 ## Color Systems
 
@@ -336,6 +441,15 @@ By default, the component uses a modern color palette with light colors for text
 <avatar name="John Doe" :use-legacy-colors="true" />
 ```
 
+## Migration Guide (v4 -> v5)
+
+v5 has two breaking changes:
+
+1. **The native `title` attribute is gone.** A styled tooltip replaces it. Set `native-title` to restore the old attribute, or `:tooltip="false"` for neither.
+2. **Status colours and positioning changed.** CSS keywords became hexadecimal tokens, and the indicator is inset to sit on the avatar's outline.
+
+The [full migration guide](https://vue3-avatar.absurdengineer.com/migration/v4-to-v5) covers both, with the code needed to pin the old behaviour.
+
 ## Migration Guide (v4.0 -> v4.1)
 
 v4.1 is fully backward compatible. Summary of new features:
@@ -356,6 +470,43 @@ v4 is mostly backward compatible. Key changes:
 4.  **Strict Initials:** The initials algorithm is now frozen and formalized.
 
 ## Developer Notes
+
+The source is TypeScript throughout — utilities, composables, and SFCs using
+`<script setup lang="ts">`. The shipped declarations in `dist/types` are
+**emitted from source** by `vue-tsc`, so the public API cannot drift from the
+implementation. `src/types.ts` holds the exported type surface.
+
+### Scripts
+
+| Command | What it does |
+| --- | --- |
+| `npm test` | Component and unit tests in jsdom. |
+| `npm run test:visual` | Pixel-by-pixel visual regression tests in real Chromium. |
+| `npm run test:visual:update` | Re-record the reference images. |
+| `npm run test:visual:headed` | Run the visual suite in a visible browser window. |
+| `npm run test:all` | Typecheck, then both suites. |
+| `npm run typecheck` | `vue-tsc` over source and tests. |
+| `npm run build` | Rollup bundles, the Nuxt module, and the emitted types. |
+| `npm run size` | Fails if the gzipped bundle exceeds its budget. |
+
+VS Code users get the same entries in the Run and Debug panel.
+
+### Visual regression testing
+
+`tests/visual/` renders the real components in a real browser, screenshots
+them, and compares against committed reference images pixel by pixel — plus
+direct colour probes that assert the documented status, badge, and tooltip
+palettes are painted exactly. jsdom cannot do this: it has no layout engine, so
+it cannot tell you a status dot drifted off a hexagon's edge or that a tooltip
+flipped to the wrong side.
+
+232 reference images cover shape x variant, status x corner x shape, badge
+variant x corner, all eight pixel themes, all twelve tooltip placements, group
+layouts, and interaction states. Boolean props are covered pairwise in
+`tests/permutations.spec.ts`, where they are far cheaper to run than as images.
+
+See [`tests/visual/README.md`](tests/visual/README.md) for the details,
+including how to add a Linux golden set for CI.
 
 This package is built with the **node v16.20.2 (npm v8.19.4)**
 

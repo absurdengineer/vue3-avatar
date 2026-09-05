@@ -1,0 +1,67 @@
+name: Visual
+
+# Kept separate from ci.yml on purpose: this job needs a browser, takes about a
+# minute, and its goldens are platform-specific. A failure here means pixels
+# moved, which is a different conversation from a failing unit test.
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      record:
+        description: Re-record the Linux goldens instead of asserting them
+        type: boolean
+        default: false
+
+jobs:
+  visual:
+    # Pinned rather than `ubuntu-latest`: these are pixel comparisons, and a
+    # runner image bump can change font rasterisation underneath the goldens.
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Compare against goldens
+        if: ${{ !inputs.record }}
+        run: npm run test:visual
+
+      - name: Re-record goldens
+        if: ${{ inputs.record }}
+        run: npm run test:visual:update
+
+      # Golden, actual and diff for every case that moved, so a reviewer can
+      # judge the change without reproducing it locally.
+      - name: Upload diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diff-${{ github.run_id }}
+          path: tests/visual/__diff__/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      # On a `record` run this is the deliverable: download it and commit the
+      # contents to tests/visual/__screenshots__/linux-x64/. On a failure it is
+      # what the run measured, which is occasionally the faster way to look.
+      - name: Upload goldens
+        if: ${{ inputs.record || failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-goldens-linux-x64
+          path: tests/visual/__screenshots__/linux-x64/
+          if-no-files-found: warn
+          retention-days: 14
