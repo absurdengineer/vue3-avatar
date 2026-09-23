@@ -81,6 +81,7 @@ export default defineConfig({
       { text: "Playground", link: "/playground" },
       { text: "Examples", link: "/examples/" },
       { text: "Comparison", link: "/comparison" },
+      { text: "What's new", link: "/whats-new" },
       { text: `v${version}`, link: "https://www.npmjs.com/package/vue3-avatar" },
     ],
     sidebar: {
@@ -91,8 +92,13 @@ export default defineConfig({
       "/components/": [
         { text: "Avatar Component", link: "/components/avatar" },
         { text: "AvatarGroup Component", link: "/components/group" },
+        { text: "Tooltips", link: "/components/tooltip" },
       ],
       "/examples/": [{ text: "Examples & Presets", link: "/examples/" }],
+      "/migration/": [
+        { text: "What's new in v5", link: "/whats-new" },
+        { text: "v4 to v5", link: "/migration/v4-to-v5" },
+      ],
     },
     socialLinks: [
       { icon: "github", link: "https://github.com/absurdengineer/vue3-avatar" },
@@ -106,7 +112,7 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        "vue3-avatar": path.resolve(process.cwd(), "./src/entry.esm.js"),
+        "vue3-avatar": path.resolve(process.cwd(), "./src/entry.esm.ts"),
         "@": path.resolve(process.cwd(), "./src"),
       },
     },

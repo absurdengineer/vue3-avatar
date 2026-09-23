@@ -44,7 +44,15 @@ export default defineNuxtConfig({
 });
 ```
 
-Any prop on `Avatar` or `AvatarGroup` (see the [Avatar](/components/avatar) and [AvatarGroup](/components/group) references) can be set as a default here; an explicit prop on a component instance always overrides the default.
+Any prop on `Avatar` or `AvatarGroup` (see the [Avatar](/components/avatar) and [AvatarGroup](/components/group) references) can be set as a default here. An explicit prop on a component instance always overrides the default, even when it matches the component's library default or is explicitly `false`.
+
+```vue
+<!-- The global size is 100, but this avatar is explicitly 40px. -->
+<Avatar name="Ada Lovelace" :size="40" />
+
+<!-- A global autoContrast=true can be disabled for this instance. -->
+<Avatar name="Grace Hopper" :auto-contrast="false" />
+```
 
 ## TypeScript
 

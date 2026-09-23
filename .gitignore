@@ -13,7 +13,14 @@ yarn-error.log*
 
 # Editor directories and files
 .idea
-.vscode
+
+# The shared VS Code configuration is committed on purpose: the launch entries
+# are how the visual suite is meant to be run and re-recorded. Personal state
+# under .vscode stays ignored.
+.vscode/*
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/extensions.json
 *.suo
 *.ntvs*
 *.njsproj
@@ -28,3 +35,6 @@ yarn-error.log*
 # VitePress docs output
 docs/.vitepress/dist
 docs/.vitepress/cache
+# Visual regression artifacts. Goldens under tests/visual/__screenshots__ are
+# committed; diffs are per-run debugging output and are not.
+tests/visual/__diff__/

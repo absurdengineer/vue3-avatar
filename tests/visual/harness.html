@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>vue3-avatar visual harness</title>
+    <style>
+      /*
+       * Everything here exists to make screenshots deterministic. Any styling
+       * that could vary between runs — system fonts, scrollbars, subpixel
+       * antialiasing — is pinned or removed.
+       */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
+      }
+      body {
+        overflow: hidden;
+      }
+      #stage {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        /* Padding gives status dots, badges and rings room inside the shot. */
+        padding: 24px;
+        background: #ffffff;
+      }
+      /* Animations would make every capture a coin flip. */
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        caret-color: transparent !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <script type="module" src="/tests/visual/harness.ts"></script>
+  </body>
+</html>

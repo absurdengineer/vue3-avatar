@@ -1,0 +1,11 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "search.exclude": {
+    "tests/visual/__screenshots__/**": true,
+    "tests/visual/__diff__/**": true,
+    "dist/**": true
+  },
+  "files.associations": {
+    "*.spec.ts": "typescript"
+  }
+}

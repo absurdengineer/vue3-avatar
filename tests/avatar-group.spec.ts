@@ -1,0 +1,120 @@
+import { describe, it, expect, vi } from 'vitest'
+import { mount } from '@vue/test-utils'
+import AvatarGroup from '../src/components/AvatarGroup.vue'
+import Avatar from '../src/components/Avatar.vue'
+import { h } from 'vue'
+
+describe('AvatarGroup Component', () => {
+  it('renders all children when max is not set', () => {
+    const wrapper = mount(AvatarGroup, {
+      slots: {
+        default: () => [
+          h('div', { class: 'av' }, '1'),
+          h('div', { class: 'av' }, '2')
+        ]
+      }
+    })
+    expect(wrapper.findAll('.av')).toHaveLength(2)
+    expect(wrapper.find('.avatar-overflow').exists()).toBe(false)
+  })
+
+  it('renders limited children and overflow badge when max is set', () => {
+    const wrapper = mount(AvatarGroup, {
+      props: { max: 2 },
+      slots: {
+        default: () => [
+            h('div', { class: 'av' }, '1'),
+            h('div', { class: 'av' }, '2'),
+            h('div', { class: 'av' }, '3')
+        ]
+      }
+    })
+    
+    expect(wrapper.findAll('.av')).toHaveLength(2)
+    expect(wrapper.find('.avatar-overflow').exists()).toBe(true)
+    expect(wrapper.find('.avatar-overflow').text()).toBe('+1')
+    expect(wrapper.find('.avatar-overflow').element.tagName).toBe('BUTTON')
+    expect(wrapper.find('.avatar-overflow').attributes('aria-label')).toBe('Show 1 more avatar')
+  })
+
+  it('emits overflow-click from a keyboard-accessible overflow button', async () => {
+    const wrapper = mount(AvatarGroup, {
+      props: { max: 1 },
+      slots: {
+        default: () => [
+          h(Avatar, { name: 'Tony Stark' }),
+          h(Avatar, { name: 'Bruce Banner' })
+        ]
+      }
+    })
+
+    const overflow = wrapper.find('button.avatar-overflow')
+    expect(overflow.attributes('type')).toBe('button')
+    expect(overflow.attributes('aria-label')).toBe('Show 1 more avatar: Bruce Banner')
+    await overflow.trigger('click')
+    expect(wrapper.emitted('overflow-click')).toHaveLength(1)
+  })
+
+  it('makes a clickable group keyboard accessible', async () => {
+    const onClick = vi.fn()
+    const wrapper = mount(AvatarGroup, { props: { onClick } })
+
+    expect(wrapper.attributes('role')).toBe('button')
+    expect(wrapper.attributes('tabindex')).toBe('0')
+    await wrapper.trigger('keydown', { key: 'Enter' })
+    await wrapper.trigger('keydown', { key: ' ' })
+    expect(onClick).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not activate the group from an interactive child', async () => {
+    const groupClick = vi.fn()
+    const avatarClick = vi.fn()
+    const wrapper = mount(AvatarGroup, {
+      props: { onClick: groupClick },
+      slots: {
+        default: () => [
+          h(Avatar, {
+            name: 'Tony Stark',
+            interactive: true,
+            onClick: avatarClick,
+          }),
+        ],
+      },
+    })
+
+    const avatar = wrapper.findComponent(Avatar)
+    await avatar.trigger('click')
+    await avatar.trigger('keydown', { key: 'Enter' })
+
+    expect(avatarClick).toHaveBeenCalledTimes(2)
+    expect(groupClick).not.toHaveBeenCalled()
+  })
+
+  it('applies overlap style', () => {
+    const wrapper = mount(AvatarGroup, {
+      props: { overlap: 20 }
+    })
+    expect(wrapper.attributes('style')).toContain('--va-group-overlap: -20px')
+  })
+
+  it('passes props to child components', () => {
+    const wrapper = mount(AvatarGroup, {
+      props: { size: 60, borderColor: 'red' },
+      slots: {
+        default: () => [
+          h(Avatar, { name: 'John Doe' }),
+        ]
+      }
+    })
+    const avatar = wrapper.findComponent(Avatar)
+    expect(avatar.props('size')).toBe(60)
+    expect(avatar.props('borderColor')).toBe('red')
+  })
+
+  it('applies triangle layout', () => {
+    const wrapper = mount(AvatarGroup, {
+      props: { layout: 'triangle' }
+    })
+    expect(wrapper.classes()).toContain('layout-triangle')
+  })
+})

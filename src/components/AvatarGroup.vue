@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 import {
   h,
   defineComponent,
@@ -7,8 +7,23 @@ import {
   Text,
   cloneVNode,
   inject,
+  ref,
+  getCurrentInstance,
 } from "vue";
-import { AvatarConfigKey } from "../utils/config";
+import type { PropType, VNode } from "vue";
+import type {
+  AvatarGroupLayout,
+  AvatarTooltipPlacement,
+  AvatarTooltipTheme,
+} from "../types";
+import {
+  AvatarConfigKey,
+  createConfigResolver,
+  hasVNodeProp,
+} from "../utils/config";
+import AvatarTooltip from "./AvatarTooltip.vue";
+import { useTooltip } from "../composables/useTooltip";
+import { PLACEMENTS } from "../utils/position";
 
 export default defineComponent({
   name: "AvatarGroup",
@@ -18,24 +33,46 @@ export default defineComponent({
     borderColor: { type: String, default: "white" },
     size: { type: Number, default: 40 },
     layout: {
-      type: String,
+      type: String as PropType<AvatarGroupLayout>,
       default: "stack", // stack | triangle
-      validator: (value) => ["stack", "triangle"].includes(value),
+      validator: (value: string) => ["stack", "triangle"].includes(value),
     },
-    onClick: { type: Function, default: null },
+    onClick: {
+      type: Function as unknown as PropType<
+        ((event: MouseEvent | KeyboardEvent) => void) | null
+      >,
+      default: null,
+    },
     pointer: { type: Boolean, default: false },
+    /** Tooltip listing the hidden names on the "+N" badge. `false` disables it. */
+    overflowTooltip: {
+      type: [Boolean, String] as PropType<boolean | string>,
+      default: undefined,
+    },
+    tooltipPlacement: {
+      type: String as PropType<AvatarTooltipPlacement>,
+      default: "top",
+      validator: (value: any) => PLACEMENTS.includes(value),
+    },
+    tooltipTheme: {
+      type: String as PropType<AvatarTooltipTheme>,
+      default: "dark",
+      validator: (value: string) => ["dark", "light", "auto"].includes(value),
+    },
+    /** Restores the v4 behaviour of native `title` attributes. */
+    nativeTitle: { type: Boolean, default: false },
   },
   emits: ["overflow-click"],
   setup(props, { slots, emit }) {
-    const flatten = (nodes) => {
-      let result = [];
+    const flatten = (nodes: VNode[]): VNode[] => {
+      let result: VNode[] = [];
       for (const node of nodes) {
         if (node.type === Fragment && Array.isArray(node.children)) {
-          result = result.concat(flatten(node.children));
+          result = result.concat(flatten(node.children as VNode[]));
         } else if (node.type !== Comment) {
           // Skip empty text nodes
           if (node.type === Text) {
-            if (node.children.trim().length === 0) continue;
+            if (String(node.children).trim().length === 0) continue;
           }
           result.push(node);
         }
@@ -44,12 +81,21 @@ export default defineComponent({
     };
 
     const globalConfig = inject(AvatarConfigKey, {});
+    const instance = getCurrentInstance();
+    const getConfig = createConfigResolver(globalConfig, (key) =>
+      hasVNodeProp(instance?.vnode.props, key)
+    );
 
-    const getConfig = (key, localValue, defaultValue) => {
-      if (localValue !== undefined && localValue !== defaultValue)
-        return localValue;
-      return globalConfig[key] !== undefined ? globalConfig[key] : defaultValue;
-    };
+    const overflowEl = ref<HTMLElement | null>(null);
+    const overflowTooltipId = `va-group-tooltip-${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
+    const {
+      isOpen: overflowTooltipOpen,
+      referenceProps: overflowTooltipListeners,
+    } = useTooltip(() => ({
+      disabled: props.nativeTitle || props.overflowTooltip === false,
+    }));
 
     return () => {
       const defaultSlot = slots.default ? slots.default() : [];
@@ -68,40 +114,58 @@ export default defineComponent({
         }
       }
 
-      if (effectiveMax && children.length > effectiveMax) {
+      // `!= null` rather than a truthiness check: the triangle layout can
+      // legitimately compute an effective maximum of 0 (max=1 leaves the single
+      // slot to the overflow badge), and a falsy test would skip the limit
+      // entirely and render every child.
+      if (effectiveMax != null && children.length > effectiveMax) {
         visible = children.slice(0, effectiveMax);
         overflowCount = children.length - effectiveMax;
       }
 
       const allNames = children
-        .map((child) => child.props && child.props.name)
+        .map((child) => child.props && (child.props as any).name)
         .filter(Boolean)
         .join(", ");
 
       const hiddenChildren =
         overflowCount > 0 ? children.slice(effectiveMax) : [];
       const hiddenNames = hiddenChildren
-        .map((child) => child.props && child.props.name)
+        .map((child) => child.props && (child.props as any).name)
         .filter(Boolean)
         .join(", ");
 
       // Extract all user data
-      const allUsers = children.map((child) => child.props).filter(Boolean);
+      const allUsers = children
+        .map((child) => child.props)
+        .filter(Boolean) as Record<string, unknown>[];
 
       // Extract hidden user data for the event payload
       const hiddenUsers = hiddenChildren
         .map((child) => child.props)
-        .filter(Boolean);
+        .filter(Boolean) as Record<string, unknown>[];
 
-      const handleOverflowClick = (e) => {
+      const handleOverflowClick = (e: MouseEvent) => {
         e.stopPropagation();
         emit("overflow-click", hiddenUsers, allUsers);
       };
 
-      const handleGroupKeydown = (event) => {
-        if (!props.onClick || !["Enter", " ", "Spacebar"].includes(event.key)) {
-          return;
-        }
+      const handleGroupKeydown = (event: KeyboardEvent) => {
+        if (!props.onClick) return;
+        // The group can contain interactive avatars and the overflow button.
+        // Only the group's own focus should activate the group's callback.
+        if (event.target !== event.currentTarget) return;
+        // Same normalisation as Avatar: environments disagree on the casing of
+        // `key`, and "Spacebar"/"space" are the older spellings of " ".
+        const key = String(event.key || "").toLowerCase();
+        const isActivation =
+          key === "enter" ||
+          key === " " ||
+          key === "spacebar" ||
+          key === "space" ||
+          event.keyCode === 13 ||
+          event.keyCode === 32;
+        if (!isActivation) return;
         event.preventDefault();
         props.onClick(event);
       };
@@ -110,18 +174,32 @@ export default defineComponent({
       const borderColor = getConfig("borderColor", props.borderColor, "white");
       const overlap = getConfig("overlap", props.overlap, 10);
 
+      const overflowTooltipContent =
+        typeof props.overflowTooltip === "string"
+          ? props.overflowTooltip
+          : hiddenNames;
+      const showOverflowTooltip =
+        overflowCount > 0 &&
+        !props.nativeTitle &&
+        props.overflowTooltip !== false &&
+        Boolean(overflowTooltipContent || slots["overflow-tooltip"]);
+
       const overflowBadge =
         overflowCount > 0
           ? h(
               "button",
               {
+                ref: overflowEl,
                 type: "button",
                 class: "avatar-overflow",
-                title: hiddenNames,
+                title: props.nativeTitle ? hiddenNames : undefined,
                 "aria-label": `Show ${overflowCount} more avatar${
                   overflowCount === 1 ? "" : "s"
                 }${hiddenNames ? `: ${hiddenNames}` : ""}`,
+                // The aria-label already names the hidden users, so the tooltip
+                // is decoration here rather than a description.
                 onClick: handleOverflowClick,
+                ...(showOverflowTooltip ? overflowTooltipListeners.value : {}),
                 style: {
                   width: `${size}px`,
                   height: `${size}px`,
@@ -132,6 +210,31 @@ export default defineComponent({
               `+${overflowCount}`
             )
           : null;
+
+      const overflowTooltipNode = showOverflowTooltip
+        ? h(
+            AvatarTooltip,
+            {
+              id: overflowTooltipId,
+              open: overflowTooltipOpen.value,
+              reference: overflowEl.value,
+              placement: props.tooltipPlacement,
+              theme: props.tooltipTheme,
+              "aria-hidden": "true",
+            },
+            {
+              default: () =>
+                slots["overflow-tooltip"]
+                  ? slots["overflow-tooltip"]({
+                      hiddenUsers,
+                      allUsers,
+                      overflowCount,
+                      hiddenNames,
+                    })
+                  : overflowTooltipContent,
+            }
+          )
+        : null;
 
       const visibleWithProps = visible.map((child) => {
         return cloneVNode(child, {
@@ -148,20 +251,23 @@ export default defineComponent({
             `layout-${props.layout}`,
             { "is-clickable": props.pointer || !!props.onClick },
           ],
-          title: allNames,
+          title: props.nativeTitle ? allNames : undefined,
           role: props.onClick ? "button" : undefined,
           tabindex: props.onClick ? 0 : undefined,
           "aria-label": props.onClick
             ? `Avatar group${allNames ? `: ${allNames}` : ""}`
             : undefined,
-          onClick: (e) => props.onClick && props.onClick(e),
+          onClick: (e: MouseEvent) => {
+            if (e.target !== e.currentTarget) return;
+            props.onClick && props.onClick(e);
+          },
           onKeydown: handleGroupKeydown,
           style: {
             "--va-group-overlap": `-${overlap}px`,
             "--va-size": `${size}px`,
           },
         },
-        [...visibleWithProps, overflowBadge]
+        [...visibleWithProps, overflowBadge, overflowTooltipNode]
       );
     };
   },
@@ -176,14 +282,18 @@ export default defineComponent({
 .avatar-group.is-clickable {
   cursor: pointer;
 }
+.avatar-group:focus-visible {
+  outline: 2px solid var(--va-focus-ring, #2563eb);
+  outline-offset: 2px;
+}
 .avatar-group.is-clickable * {
   cursor: pointer !important;
 }
 .avatar-group.layout-stack > * {
-  margin-left: 0;
+  margin-inline-start: 0;
 }
 .avatar-group.layout-stack > * + * {
-  margin-left: var(--va-group-overlap);
+  margin-inline-start: var(--va-group-overlap);
 }
 .avatar-group.layout-triangle {
   position: relative;
@@ -204,12 +314,12 @@ export default defineComponent({
 }
 .avatar-group.layout-triangle > *:nth-child(2) {
   bottom: 0;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 5 !important;
 }
 .avatar-group.layout-triangle > *:nth-child(3) {
   bottom: 0;
-  right: 0;
+  inset-inline-end: 0;
   z-index: 1 !important;
 }
 .avatar-overflow {
