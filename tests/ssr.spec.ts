@@ -20,6 +20,16 @@ describe("Server rendering", () => {
     expect(html).toContain("JD");
   });
 
+  it("renders seeded pixel art deterministically without exposing the seed", async () => {
+    const props = { name: "Ada Lovelace", seed: "account-42", variant: "pixel" };
+    const html = await render(Avatar, props);
+
+    expect(html).toBe(await render(Avatar, props));
+    expect(html).toContain("<svg");
+    expect(html).toContain('aria-label="Avatar of Ada Lovelace"');
+    expect(html).not.toContain("account-42");
+  });
+
   it("renders an image avatar with the status and badge markup", async () => {
     const html = await render(Avatar, {
       name: "John Doe",

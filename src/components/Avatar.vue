@@ -24,6 +24,7 @@
     <!-- Scoped slot for custom image component (e.g., NuxtImg) -->
     <slot
       v-if="showImage() && $slots.image"
+      :key="imageRequest.key"
       name="image"
       :src="currentSrc"
       :srcset="resolvedSrcset"
@@ -32,11 +33,12 @@
       :size="size"
       :style="imageStyle"
       :class="{ 'image-loaded': isLoaded, 'image-transition': transition }"
-      @error="onImageError"
-      @load="onImageLoad"
+      :onError="imageRequest.onError"
+      :onLoad="imageRequest.onLoad"
     ></slot>
     <img
       v-else-if="showImage()"
+      :key="imageRequest.key"
       :style="imageStyle"
       :height="size"
       :width="size"
@@ -49,8 +51,8 @@
       :loading="loading"
       :class="{ 'image-loaded': isLoaded, 'image-transition': transition }"
       alt=""
-      @error="onImageError"
-      @load="onImageLoad"
+      @error="imageRequest.onError"
+      @load="imageRequest.onLoad"
     />
     <!-- Scoped slot for custom placeholder when no image and no name -->
     <slot
@@ -134,12 +136,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, inject, watch, onMounted, useSlots } from "vue";
+import {
+  computed,
+  ref,
+  inject,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  useSlots,
+  getCurrentInstance,
+} from "vue";
 import type { CSSProperties, PropType } from "vue";
 import AvatarTooltip from "./AvatarTooltip.vue";
 import { useTooltip } from "../composables/useTooltip";
 import { PLACEMENTS } from "../utils/position";
-import { getInitials } from "../utils/initials";
+import { countGraphemes, getInitials } from "../utils/initials";
 import { getAvatarColors } from "../utils/colors";
 import {
   generatePixelGrid,
@@ -147,7 +158,11 @@ import {
   PIXEL_THEMES,
 } from "../utils/pixelgen";
 import { getContrastColor } from "../utils/contrast";
-import { AvatarConfigKey, createConfigResolver } from "../utils/config";
+import {
+  AvatarConfigKey,
+  createConfigResolver,
+  hasVNodeProp,
+} from "../utils/config";
 import type {
   AvatarAs,
   AvatarReferrerPolicy,
@@ -176,6 +191,10 @@ const props = defineProps({
   name: {
     type: String,
     required: true,
+  },
+  /** Stable identity for generated colors and pixel art; defaults to name. */
+  seed: {
+    type: [String, Number],
   },
   color: {
     type: String,
@@ -516,16 +535,30 @@ const slots = useSlots();
 const imageError = ref(false);
 const isLoaded = ref(false);
 const fallbackIndex = ref(0);
+const imageVersion = ref(0);
+let imageDisposed = false;
+onBeforeUnmount(() => {
+  imageDisposed = true;
+});
 
 // Teleports, skeletons and anything else that measures must wait for the
 // client, or the server render and the first client render disagree.
 const hasMounted = ref(false);
 onMounted(() => {
   hasMounted.value = true;
+  // An eager image can finish before hydration attaches Vue's listeners.
+  // Inspect it once on mount so its skeleton does not remain visible forever.
+  const image = container.value?.querySelector("img");
+  if (image?.complete && image.naturalWidth > 0) {
+    onImageLoad(new Event("load"));
+  }
 });
 
 const globalConfig = inject(AvatarConfigKey, {});
-const getConfig = createConfigResolver(globalConfig);
+const instance = getCurrentInstance();
+const getConfig = createConfigResolver(globalConfig, (key) =>
+  hasVNodeProp(instance?.vnode.props, key)
+);
 
 const isClickable = computed(() => {
   return (
@@ -688,8 +721,12 @@ function onFileSelect(event: Event): void {
   target.value = "";
 }
 
+const generationSeed = computed(() =>
+  props.seed == null ? props.name : String(props.seed)
+);
+
 const computedColors = computed(() => {
-  return getAvatarColors(props.name, props.useLegacyColors);
+  return getAvatarColors(generationSeed.value, props.useLegacyColors);
 });
 
 const displayName = computed(() => {
@@ -697,7 +734,7 @@ const displayName = computed(() => {
 });
 
 const pixelGrid = computed(() => {
-  return generatePixelGrid(props.name);
+  return generatePixelGrid(generationSeed.value);
 });
 
 const pixelSVG = computed(() => {
@@ -759,9 +796,10 @@ const displayBorderColor = computed(() => {
 
 const fontSize = computed(() => {
   const size = getConfig("size", props.size, 40);
-  if (displayName.value.length == 1) return size / 2;
-  else if (displayName.value.length == 2) return size / 2.5;
-  if (displayName.value.length == 3) return size / 3;
+  const graphemeCount = countGraphemes(displayName.value);
+  if (graphemeCount == 1) return size / 2;
+  else if (graphemeCount == 2) return size / 2.5;
+  if (graphemeCount == 3) return size / 3;
   else return 14;
 });
 
@@ -1131,7 +1169,9 @@ function retinaSrcset(src: string): string | null {
 }
 
 const resolvedSrcset = computed(() => {
-  if (props.srcset) return props.srcset;
+  // An explicit srcset describes the primary image, not its backup URLs.
+  if (props.srcset && props.imageSrc && fallbackIndex.value === 0)
+    return props.srcset;
   if (props.retina && currentSrc.value) return retinaSrcset(currentSrc.value);
   return null;
 });
@@ -1151,16 +1191,47 @@ const skeletonStyle = computed<CSSProperties>(() => {
   };
 });
 
-// A new source deserves a fresh attempt: without this, an avatar that failed
-// once stays stuck on initials even after `imageSrc` is swapped for a good URL.
+// Restart only when image inputs change, not when a parent recreates an
+// equivalent fallback array during an unrelated render.
 watch(
-  () => props.imageSrc,
-  () => {
+  [sourceChain, () => props.imageSrc, () => props.srcset, () => props.sizes, () => props.retina],
+  ([chain, ...options], [previousChain, ...previousOptions]) => {
+    if (
+      chain.length === previousChain.length &&
+      chain.every((src, index) => src === previousChain[index]) &&
+      options.every((value, index) => value === previousOptions[index])
+    ) return;
+
+    imageVersion.value++;
     imageError.value = false;
     isLoaded.value = false;
     fallbackIndex.value = 0;
   }
 );
+
+// Each rendered image gets callbacks tied to its own attempt. A late event
+// from a replaced native image or custom component cannot settle a newer one.
+const imageRequest = computed(() => {
+  const key = imageVersion.value;
+  const source = currentSrc.value;
+  const isCurrent = () =>
+    !imageDisposed && key === imageVersion.value && !imageError.value;
+  return {
+    key,
+    onLoad(event: Event) {
+      if (isCurrent() && isCurrentImageEvent(event, source)) onImageLoad(event);
+    },
+    onError(event: Event) {
+      if (isCurrent() && isCurrentImageEvent(event, source)) onImageError(event);
+    },
+  };
+});
+
+function isCurrentImageEvent(event: Event, source: string | undefined): boolean {
+  const currentTarget = event.currentTarget;
+  if (!(currentTarget instanceof Element) || !source) return true;
+  return currentTarget.getAttribute("src") === source;
+}
 
 function onImageError(event: Event): void {
   isLoaded.value = false;
@@ -1169,6 +1240,7 @@ function onImageError(event: Event): void {
   const nextIndex = fallbackIndex.value + 1;
 
   if (nextIndex < sourceChain.value.length) {
+    imageVersion.value++;
     fallbackIndex.value = nextIndex;
     emit("fallback", {
       failedSrc,

@@ -37,6 +37,12 @@
         </div>
 
         <div class="control-group control-group--wide">
+          <label for="avatar-seed">Stable seed <span class="optional">Optional</span></label>
+          <input id="avatar-seed" v-model="form.seed" type="text" placeholder="e.g. user-42" aria-describedby="avatar-seed-help" />
+          <span id="avatar-seed-help" class="help-text">Keep colors and pixel art consistent when the name changes. Leave blank to use the name.</span>
+        </div>
+
+        <div class="control-group control-group--wide">
           <label for="avatar-image">Image URL <span class="optional">Optional</span></label>
           <input id="avatar-image" v-model="form.imageSrc" type="url" inputmode="url" placeholder="https://example.com/avatar.jpg" />
           <span class="help-text">If the image cannot load, the avatar falls back to initials or pixel art.</span>
@@ -336,6 +342,7 @@
         <div class="preview-stage" :class="{ 'dark-mode': form.dark }">
           <Avatar
             :name="form.name || 'Avatar'"
+            :seed="form.seed || undefined"
             :image-src="form.imageSrc || undefined"
             :variant="form.variant"
             :pixel-theme="form.pixelTheme"
@@ -478,7 +485,7 @@ const activeTab = ref('avatar');
 const copied = ref(false);
 
 const defaults = Object.freeze({
-  name: 'Tony Stark', imageSrc: '', variant: 'initials', pixelTheme: 'earth', size: 64,
+  name: 'Tony Stark', seed: '', imageSrc: '', variant: 'initials', pixelTheme: 'earth', size: 64,
   shape: 'circle', status: 'online', statusPosition: 'bottom-right', autoContrast: true,
   dark: false, gradient: false, interactive: false, border: true,
   statusSize: 'md', statusPulse: false, badge: '', badgePosition: 'top-right',
@@ -528,6 +535,7 @@ function escaped(value) {
 
 const codeProps = computed(() => {
   const props = [`name="${escaped(form.name || 'Avatar')}"`];
+  if (form.seed) props.push(`seed="${escaped(form.seed)}"`);
   if (form.imageSrc) props.push(`image-src="${escaped(form.imageSrc)}"`);
   if (form.variant !== 'initials') props.push(`variant="${form.variant}"`);
   if (form.variant === 'pixel' && form.pixelTheme !== 'earth') props.push(`pixel-theme="${form.pixelTheme}"`);

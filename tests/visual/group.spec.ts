@@ -78,4 +78,28 @@ describe("Visual: AvatarGroup", () => {
       fullPage: true,
     });
   });
+
+  it("uses logical overlap in RTL", async () => {
+    await visual.render({
+      component: "AvatarGroup",
+      props: { layout: "stack", overlap: 16, size: 56 },
+      children: ROSTER.slice(0, 3).map((person) => ({ ...person })),
+    });
+
+    const positions = await visual.page.evaluate(() => {
+      const stage = document.querySelector("#stage") as HTMLElement | null;
+      if (stage) stage.dir = "rtl";
+      return Array.from(document.querySelectorAll("#stage .container"), (el) => {
+        const rect = el.getBoundingClientRect();
+        return { left: Math.round(rect.left), width: Math.round(rect.width) };
+      });
+    });
+
+    expect(positions).toHaveLength(3);
+    expect(positions[0].left).toBeGreaterThan(positions[1].left);
+    expect(positions[1].left).toBeGreaterThan(positions[2].left);
+    const step = positions[0].width - 16;
+    expect(positions[0].left - positions[1].left).toBe(step);
+    expect(positions[1].left - positions[2].left).toBe(step);
+  });
 });

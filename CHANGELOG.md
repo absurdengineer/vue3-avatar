@@ -2,7 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
-## [5.0.0] - 2026-09-05
+## [Unreleased]
+
+_No unreleased changes._
+
+## [5.0.0] - 2026-09-23
+
+### Added
+
+- Optional `seed` prop keeps generated colors and pixel art stable when a display name changes. Accepts a string or number; omitting it preserves name-based generation. Initials, tooltips, and accessible labels still follow `name`. Includes a stable-seed control in the playground.
+
+### Fixed
+
+- Custom image slots now receive typed `onLoad`/`onError` callbacks and the resolved image class. Bind them when rendering `NuxtImg` or another image component so skeletons, fallback chains, and image events stay synchronized.
+- Changing a fallback source chain now retries from the primary source and clears stale loaded/error state. Equivalent chains do not restart a loaded image, late events from replaced images are ignored, and a primary `srcset` is not reused for fallback URLs.
+- Eager images that finish before hydration are recognized on mount, so their skeleton does not remain visible after server rendering.
+- Explicit component props now override global defaults even when they equal the library default, including explicit `false` values such as `auto-contrast="false"`.
+- Initials now preserve visible Unicode graphemes such as emoji, flags, combining accents, and joined emoji sequences; font sizing counts those graphemes instead of UTF-16 code units.
+- AvatarGroup no longer treats bubbled child activation as a group action, and stacked/triangle layouts now use direction-aware spacing for RTL containers.
 
 ### Breaking
 

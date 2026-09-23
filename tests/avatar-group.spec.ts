@@ -66,6 +66,30 @@ describe('AvatarGroup Component', () => {
     expect(onClick).toHaveBeenCalledTimes(2)
   })
 
+  it('does not activate the group from an interactive child', async () => {
+    const groupClick = vi.fn()
+    const avatarClick = vi.fn()
+    const wrapper = mount(AvatarGroup, {
+      props: { onClick: groupClick },
+      slots: {
+        default: () => [
+          h(Avatar, {
+            name: 'Tony Stark',
+            interactive: true,
+            onClick: avatarClick,
+          }),
+        ],
+      },
+    })
+
+    const avatar = wrapper.findComponent(Avatar)
+    await avatar.trigger('click')
+    await avatar.trigger('keydown', { key: 'Enter' })
+
+    expect(avatarClick).toHaveBeenCalledTimes(2)
+    expect(groupClick).not.toHaveBeenCalled()
+  })
+
   it('applies overlap style', () => {
     const wrapper = mount(AvatarGroup, {
       props: { overlap: 20 }

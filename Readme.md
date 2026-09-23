@@ -38,7 +38,7 @@ Works with Tailwind CSS, UnoCSS, Headless UI, or any setup that doesn't include 
 ## Key Features
 
 - ⚡ **Lightweight & Fast**: Optimized for Vue 3.
-- 🎨 **Smart Initials**: Automatically extracts initials from names (e.g., "Tony Stark" → "TS").
+- 🎨 **Smart Initials**: Automatically extracts Unicode-safe initials from names (e.g., "Tony Stark" → "TS") without splitting emoji or combining accents.
 - 🖼️ **Image Support**: Seamlessly handles image URLs with automatic fallback to initials or pixel art on error.
 - 👾 **PixelGen**: Generates consistent, deterministic pixel art (identicons) like GitHub/Gravatar.
 - 👥 **Avatar Groups**: Easily stack avatars for teams with `+N` overflow badges.
@@ -56,6 +56,7 @@ Works with Tailwind CSS, UnoCSS, Headless UI, or any setup that doesn't include 
 - **Tony Stark** will become **TS**
 - **Tony Howard-Stark** will become **THS**
 - **Albert Tony Howard Stark** will become **ATS**
+- **👩‍💻 Ada** keeps the joined emoji intact as **👩‍💻A**
 
 ## Previews
 
@@ -136,6 +137,13 @@ After importing the component, use it in your template:
 <Avatar name="John Doe" />
 ```
 
+An explicitly passed prop always wins over the app default, including a value
+that matches the component default or an explicit `false`:
+
+```html
+<Avatar name="Ada Lovelace" :size="40" :auto-contrast="false" />
+```
+
 ## Nuxt.js Support
 
 **Avatar Vue** is fully SSR-safe and optimized for Nuxt.js 3+, and ships an official Nuxt module.
@@ -190,13 +198,18 @@ Use the `#image` slot to integrate with custom image components like `<NuxtImg>`
 ```html
 <template>
   <Avatar name="John Doe" image-src="/profile.jpg">
-    <template #image="{ src, alt, size, style }">
+    <template #image="{ src, srcset, sizes, alt, size, style, class: imageClass, onLoad, onError }">
       <NuxtImg
         :src="src"
+        :srcset="srcset"
+        :sizes="sizes"
         :alt="alt"
         :width="size"
         :height="size"
         :style="style"
+        :class="imageClass"
+        @load="onLoad"
+        @error="onError"
         loading="lazy"
       />
     </template>
@@ -206,13 +219,25 @@ Use the `#image` slot to integrate with custom image components like `<NuxtImg>`
 
 ### 3. SSR-Safe Deterministic Colors
 
-Colors and Pixel patterns are generated deterministically based on the `name` prop, ensuring no hydration mismatches between server-side rendering and client-side activation.
+Colors and pixel patterns are generated deterministically from `name`, or from
+the optional `seed` prop when supplied. Use the same value on the server and
+client. Pass a stable user ID to preserve generated colors and artwork after a
+rename; initials, tooltips, and accessible labels still follow `name`:
+
+```html
+<Avatar :name="user.displayName" :seed="user.id" variant="pixel" />
+```
+
+Omitting `seed` preserves existing output. Seeds accept strings and numbers,
+including `0` and an empty string. Different seeds can still produce the same
+colors or pattern.
 
 ## Props
 
 | Property                                  | Type               | Default          | Description                                                                     |
 | ----------------------------------------- | ------------------ | ---------------- | ------------------------------------------------------------------------------- |
-| `name`                                    | String             | required         | Name used for initials, generated colours, pixel art, and the accessible label. |
+| `name`                                    | String             | required         | Name used for initials and the accessible label; seeds colours and pixel art when `seed` is omitted. |
+| `seed`                                    | String / Number    | `name`           | Stable identity for generated colours and pixel art, independent of the display name. |
 | `imageSrc`                                | String             | —                | Image URL. Use `image-src` in templates.                                        |
 | `size`                                    | Number             | `40`             | Avatar diameter in pixels.                                                      |
 | `inline`                                  | Boolean            | `false`          | Displays the avatar inline.                                                     |
@@ -319,7 +344,7 @@ avatar's own width, so a long label cannot run across the face.
 
 | Slot          | Description                                                                                                             |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `image`         | Scoped slot for custom image components (e.g. `<NuxtImg>`). Provides `{ src, srcset, sizes, alt, size, style, class }`. `src` is the current link in the fallback chain. |
+| `image`         | Scoped slot for custom image components (e.g. `<NuxtImg>`). Provides `{ src, srcset, sizes, alt, size, style, class, onLoad, onError }`. Bind the callbacks to keep loading and fallback state synchronized. `src` is the current link in the fallback chain. |
 | `placeholder`   | Scoped slot for a custom placeholder when no name/image is present. Provides `{ size, style }`.                        |
 | `status`        | Custom status indicator content. Overrides default status rendering but keeps positioning.                             |
 | `badge`         | **NEW (v5)** Custom badge content. Keeps the badge's positioning and shape.                                            |
@@ -387,6 +412,8 @@ You can group multiple avatars together with `AvatarGroup`.
   - `triangle`: Pyramid shape where the first avatar is on top, and subsequent avatars form the base. _Note: Triangle layout is limited to 3 items (2 visible + 1 overflow badge if needed)._
 - `onClick`: (Function) Click callback for the entire group.
 - `pointer`: (Boolean) If true, applies `pointer` cursor to the group.
+
+Stack overlap and triangle edge placement follow the surrounding `dir` (`ltr` or `rtl`). When `onClick` is provided, only activation on the group root invokes the group callback; child avatars and the `+N` overflow badge retain their own interactions.
 
 **Events:**
 

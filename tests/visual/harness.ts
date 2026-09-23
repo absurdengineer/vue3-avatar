@@ -1,4 +1,4 @@
-import { createApp, h } from "vue";
+import { createApp, createSSRApp, h } from "vue";
 import type { App, Component } from "vue";
 import { Avatar, AvatarGroup, AvatarConfigKey } from "../../src/entry.esm";
 import type { AvatarPluginOptions } from "../../src/types";
@@ -16,6 +16,7 @@ declare global {
   interface Window {
     __mount: (request: MountRequest) => Promise<void>;
     __unmount: () => void;
+    __hydrate: (props: Record<string, unknown>) => Promise<void>;
     /** Set once fonts are ready, so captures never race the font loader. */
     __ready: boolean;
   }
@@ -35,6 +36,24 @@ function unmount() {
 }
 
 window.__unmount = unmount;
+
+window.__hydrate = async (props) => {
+  if (app) {
+    app.unmount();
+    app = null;
+  }
+  const stage = document.querySelector("#stage");
+  if (!stage) throw new Error("Missing visual test stage.");
+  app = createSSRApp({
+    render() {
+      return h(Avatar as Component, props);
+    },
+  });
+  app.mount(stage);
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  );
+};
 
 window.__mount = async ({
   component = "Avatar",

@@ -93,6 +93,8 @@ export interface PixelTheme {
 
 export interface AvatarProps {
   name: string;
+  /** Stable identity for generated colors and pixel art; defaults to name. */
+  seed?: string | number;
   color?: string;
   background?: string;
   size?: number;
@@ -206,6 +208,11 @@ export interface AvatarImageSlotProps {
   alt: string;
   size: number;
   style: CSSProperties;
+  class: Record<string, boolean>;
+  /** Forward the custom image's load event to settle this image attempt. */
+  onLoad: (event: Event) => void;
+  /** Forward the custom image's error event to advance the fallback chain. */
+  onError: (event: Event) => void;
 }
 
 export interface AvatarPlaceholderSlotProps {

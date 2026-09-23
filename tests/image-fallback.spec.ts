@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
-import { nextTick } from "vue";
+import { h, nextTick, reactive } from "vue";
 import Avatar from "../src/components/Avatar.vue";
 import { payload } from "./helpers/emitted";
 import type { AvatarFallbackPayload } from "../src/types";
@@ -123,6 +123,104 @@ describe("Fallback chain", () => {
       "https://example.com/fresh.png"
     );
   });
+
+  it("retries a changed fallback chain after every source failed", async () => {
+    const wrapper = mount(Avatar, {
+      props: { name: "John Doe", imageSrc: IMG, fallbackSrc: "broken.png" },
+    });
+    await wrapper.find("img").trigger("error");
+    await wrapper.find("img").trigger("error");
+    expect(wrapper.find("img").exists()).toBe(false);
+
+    await wrapper.setProps({ fallbackSrc: "replacement.png" });
+    expect(wrapper.find("img").attributes("src")).toBe(IMG);
+    expect(wrapper.find(".avatar-skeleton").exists()).toBe(true);
+    await wrapper.find("img").trigger("error");
+    expect(wrapper.find("img").attributes("src")).toBe("replacement.png");
+    await wrapper.find("img").trigger("load");
+    expect(wrapper.find(".avatar-skeleton").exists()).toBe(false);
+    expect(wrapper.emitted("error")).toHaveLength(1);
+  });
+
+  it("clears loaded state when a loaded fallback is replaced", async () => {
+    const wrapper = mount(Avatar, {
+      props: { name: "John Doe", imageSrc: IMG, fallbackSrc: "fallback.png" },
+    });
+    await wrapper.find("img").trigger("error");
+    await wrapper.find("img").trigger("load");
+    expect(wrapper.find("img").classes()).toContain("image-loaded");
+
+    await wrapper.setProps({ fallbackSrc: "replacement.png" });
+    expect(wrapper.find("img").classes()).not.toContain("image-loaded");
+    expect(wrapper.find(".avatar-skeleton").exists()).toBe(true);
+    expect(wrapper.find("img").attributes("src")).toBe(IMG);
+  });
+
+  it("retries after an in-place reactive fallback-array update", async () => {
+    const fallbackSrc = reactive(["broken.png"]);
+    const wrapper = mount({
+      render: () => h(Avatar, { name: "John Doe", fallbackSrc }),
+    });
+    await wrapper.find("img").trigger("error");
+    expect(wrapper.find("img").exists()).toBe(false);
+
+    fallbackSrc.push("replacement.png");
+    await nextTick();
+    expect(wrapper.find("img").attributes("src")).toBe("broken.png");
+    await wrapper.find("img").trigger("error");
+    expect(wrapper.find("img").attributes("src")).toBe("replacement.png");
+  });
+
+  it("preserves a loaded fallback when a new array has the same sources", async () => {
+    const wrapper = mount(Avatar, {
+      props: { name: "John Doe", imageSrc: IMG, fallbackSrc: ["fallback.png"] },
+    });
+    await wrapper.find("img").trigger("error");
+    await wrapper.find("img").trigger("load");
+    const loadedImage = wrapper.find("img").element;
+
+    await wrapper.setProps({ fallbackSrc: ["fallback.png"] });
+    expect(wrapper.find("img").element).toBe(loadedImage);
+    expect(wrapper.find("img").attributes("src")).toBe("fallback.png");
+    expect(wrapper.find("img").classes()).toContain("image-loaded");
+    expect(wrapper.find(".avatar-skeleton").exists()).toBe(false);
+    expect(wrapper.emitted("load")).toHaveLength(1);
+  });
+
+  it("recovers when a fallback-only avatar gets a replacement source", async () => {
+    const wrapper = mount(Avatar, {
+      props: { name: "John Doe", fallbackSrc: "broken.png" },
+    });
+    await wrapper.find("img").trigger("error");
+    expect(wrapper.text()).toBe("JD");
+
+    await wrapper.setProps({ fallbackSrc: "replacement.png" });
+    expect(wrapper.find("img").attributes("src")).toBe("replacement.png");
+    expect(wrapper.find(".avatar-skeleton").exists()).toBe(true);
+  });
+
+  it("ignores native load and error events from a replaced image", async () => {
+    const wrapper = mount(Avatar, {
+      props: { name: "John Doe", imageSrc: IMG, fallbackSrc: "fallback.png" },
+    });
+    const oldImage = wrapper.find("img").element;
+
+    await wrapper.setProps({ imageSrc: "replacement.png" });
+    oldImage.dispatchEvent(new Event("load"));
+    oldImage.dispatchEvent(new Event("error"));
+    await nextTick();
+
+    expect(wrapper.find("img").attributes("src")).toBe("replacement.png");
+    expect(wrapper.find("img").classes()).not.toContain("image-loaded");
+    expect(wrapper.find(".avatar-skeleton").exists()).toBe(true);
+    expect(wrapper.emitted("load")).toBeUndefined();
+    expect(wrapper.emitted("fallback")).toBeUndefined();
+    expect(wrapper.emitted("error")).toBeUndefined();
+
+    await wrapper.find("img").trigger("load");
+    expect(wrapper.find("img").classes()).toContain("image-loaded");
+    expect(wrapper.emitted("load")).toHaveLength(1);
+  });
 });
 
 describe("Image attributes", () => {
@@ -185,6 +283,25 @@ describe("Image attributes", () => {
       },
     }).find("img");
     expect(img.attributes("srcset")).toBe("custom.png 2x");
+  });
+
+  it("does not reuse the primary srcset after advancing to a fallback", async () => {
+    const wrapper = mount(Avatar, {
+      props: {
+        name: "John Doe",
+        imageSrc: IMG,
+        srcset: "primary-small.png 1x, primary-large.png 2x",
+        fallbackSrc: "fallback.png",
+      },
+    });
+    await wrapper.find("img").trigger("error");
+    expect(wrapper.find("img").attributes("src")).toBe("fallback.png");
+    expect(wrapper.find("img").attributes("srcset")).toBeUndefined();
+
+    await wrapper.setProps({ imageSrc: "replacement.png" });
+    expect(wrapper.find("img").attributes("srcset")).toBe(
+      "primary-small.png 1x, primary-large.png 2x"
+    );
   });
 });
 

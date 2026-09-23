@@ -22,6 +22,7 @@ import type {
 
 const everyProp: Required<AvatarProps> = {
   name: "John Doe",
+  seed: "user-42",
   color: "#ffffff",
   background: "#000000",
   size: 40,
@@ -101,6 +102,13 @@ const everyProp: Required<AvatarProps> = {
 };
 void everyProp;
 
+const numericSeed: AvatarProps["seed"] = 0;
+void numericSeed;
+
+// @ts-expect-error Seeds must be strings or numbers, not arbitrary objects.
+const invalidSeed: AvatarProps["seed"] = { id: "user-42" };
+void invalidSeed;
+
 // A custom presence name is allowed alongside the four built-ins.
 const customStatus: AvatarProps["status"] = "in-meeting";
 void customStatus;
@@ -145,8 +153,11 @@ const tooltipProps: Required<AvatarTooltipProps> = {
 void tooltipProps;
 
 const slots: AvatarSlots = {
-  image: ({ src, srcset, sizes, alt, size, style }) =>
-    [src, srcset, sizes, alt, size, style],
+  image: ({ src, srcset, sizes, alt, size, style, class: imageClass, onLoad, onError }) => {
+    onLoad(new Event("load"));
+    onError(new Event("error"));
+    return [src, srcset, sizes, alt, size, style, imageClass];
+  },
   placeholder: ({ size, style }) => [size, style],
   status: () => null,
   overlay: () => null,

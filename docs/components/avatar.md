@@ -23,7 +23,8 @@ description: Full props, events, slots, and CSS variable reference for the vue3-
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `name` | `String` | required | Name used for initials, generated colours, pixel art, and the accessible label. |
+| `name` | `String` | required | Name used for initials and the accessible label; also seeds generated colours and pixel art when `seed` is omitted. |
+| `seed` | `String \| Number` | `name` | Stable identity for generated colours and pixel art. Initials and labels still use `name`. |
 | `imageSrc` | `String` | — | Image URL. In templates use `image-src`. |
 | `variant` | `'initials' \| 'pixel'` | `'initials'` | Selects initials or deterministic pixel art. |
 | `pixelTheme` | `String` | `'earth'` | Pixel theme: `earth`, `neon`, `ocean`, `forest`, `sunset`, `midnight`, `candy`, or `retro`. |
@@ -45,6 +46,44 @@ description: Full props, events, slots, and CSS variable reference for the vue3-
 | `customAvatarStyle` / `customStatusStyle` | `Object` | `{}` | Inline style overrides for the avatar or status indicator. |
 | `useLegacyColors` | `Boolean` | `false` | Uses the legacy `vue-avatar` colour palette. |
 | `useTextColorForBorder` | `Boolean` | `false` | Uses the calculated text colour as the border colour. |
+
+### Initials and Unicode names
+
+Initials keep the existing first/second/last-word selection rule, while treating
+visible grapheme clusters as one character. This keeps emoji, flags, combining
+accents, and zero-width-joiner sequences intact instead of splitting their
+UTF-16 code units. Repeated whitespace is ignored, and hyphens remain word
+separators.
+
+```vue
+<Avatar name="👩‍💻 Ada" />       <!-- 👩‍💻A -->
+<Avatar name="éclair Smith" />  <!-- ÉS -->
+<Avatar name="🇩🇪 Berlin" />      <!-- 🇩🇪B -->
+```
+
+The component uses `Intl.Segmenter` when available and a bundled fallback for
+common combining marks, emoji modifiers, flags, and joined emoji. The same
+algorithm runs during SSR and hydration, so the visible initials and font size
+remain stable across supported environments.
+
+### Stable generated avatars
+
+Pass a stable user ID as `seed` to keep generated colours and pixel art consistent
+when the display name changes. Initials, the default tooltip, and the accessible
+label continue to use `name`.
+
+```vue
+<Avatar :name="user.displayName" :seed="user.id" />
+<Avatar :name="user.displayName" :seed="user.id" variant="pixel" />
+```
+
+Try entering a seed in the [playground](/playground), then changing the name.
+Omit `seed` to retain the existing name-based output. Numeric seeds are converted
+to strings (`42` and `"42"` produce the same output); `0` and `""` are valid explicit
+seeds. Supply the same seed on the server and client for consistent rendering.
+The existing generators can produce collisions, so different seeds do not
+guarantee different artwork or colours. Explicit colour overrides and pixel
+themes continue to apply, and image loading/fallback behavior is unchanged.
 
 ### Images
 
@@ -196,7 +235,7 @@ See the [Tooltip](/components/tooltip) page for the full reference.
 
 | Slot | Scope | Description |
 | --- | --- | --- |
-| `image` | `{ src, srcset, sizes, alt, size, style, class }` | Replace the native image, for example with `NuxtImg`. `src` is the current link in the fallback chain. |
+| `image` | `{ src, srcset, sizes, alt, size, style, class, onLoad, onError }` | Replace the native image, for example with `NuxtImg`. Bind the supplied callbacks so loading and fallback state stays synchronized. `src` is the current link in the fallback chain. |
 | `placeholder` | `{ size, style }` | Render a placeholder when neither `name` nor `image-src` is present. |
 | `status` | — | Replace the visual content of the status indicator. |
 | `badge` | — | Replace the visual content of the badge. |
@@ -208,7 +247,7 @@ See the [Tooltip](/components/tooltip) page for the full reference.
 
 ```vue
 <Avatar name="Tony Stark" image-src="/tony.jpg">
-  <template #image="{ src, srcset, sizes, alt, size, style }">
+  <template #image="{ src, srcset, sizes, alt, size, style, class: imageClass, onLoad, onError }">
     <NuxtImg
       :src="src"
       :srcset="srcset"
@@ -217,10 +256,18 @@ See the [Tooltip](/components/tooltip) page for the full reference.
       :width="size"
       :height="size"
       :style="style"
+      :class="imageClass"
+      @load="onLoad"
+      @error="onError"
     />
   </template>
 </Avatar>
 ```
+
+The callbacks belong to the current source attempt. Bind them to the rendered
+image even when using a framework image component; an old image finishing after
+the URL changes is ignored. A changed fallback chain starts over from the
+primary source, while an equivalent chain keeps a loaded image in place.
 
 ## CSS variables
 

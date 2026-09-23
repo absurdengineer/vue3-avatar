@@ -8,6 +8,7 @@ import {
   cloneVNode,
   inject,
   ref,
+  getCurrentInstance,
 } from "vue";
 import type { PropType, VNode } from "vue";
 import type {
@@ -15,7 +16,11 @@ import type {
   AvatarTooltipPlacement,
   AvatarTooltipTheme,
 } from "../types";
-import { AvatarConfigKey, createConfigResolver } from "../utils/config";
+import {
+  AvatarConfigKey,
+  createConfigResolver,
+  hasVNodeProp,
+} from "../utils/config";
 import AvatarTooltip from "./AvatarTooltip.vue";
 import { useTooltip } from "../composables/useTooltip";
 import { PLACEMENTS } from "../utils/position";
@@ -76,7 +81,10 @@ export default defineComponent({
     };
 
     const globalConfig = inject(AvatarConfigKey, {});
-    const getConfig = createConfigResolver(globalConfig);
+    const instance = getCurrentInstance();
+    const getConfig = createConfigResolver(globalConfig, (key) =>
+      hasVNodeProp(instance?.vnode.props, key)
+    );
 
     const overflowEl = ref<HTMLElement | null>(null);
     const overflowTooltipId = `va-group-tooltip-${Math.random()
@@ -144,6 +152,9 @@ export default defineComponent({
 
       const handleGroupKeydown = (event: KeyboardEvent) => {
         if (!props.onClick) return;
+        // The group can contain interactive avatars and the overflow button.
+        // Only the group's own focus should activate the group's callback.
+        if (event.target !== event.currentTarget) return;
         // Same normalisation as Avatar: environments disagree on the casing of
         // `key`, and "Spacebar"/"space" are the older spellings of " ".
         const key = String(event.key || "").toLowerCase();
@@ -246,7 +257,10 @@ export default defineComponent({
           "aria-label": props.onClick
             ? `Avatar group${allNames ? `: ${allNames}` : ""}`
             : undefined,
-          onClick: (e: MouseEvent) => props.onClick && props.onClick(e),
+          onClick: (e: MouseEvent) => {
+            if (e.target !== e.currentTarget) return;
+            props.onClick && props.onClick(e);
+          },
           onKeydown: handleGroupKeydown,
           style: {
             "--va-group-overlap": `-${overlap}px`,
@@ -276,10 +290,10 @@ export default defineComponent({
   cursor: pointer !important;
 }
 .avatar-group.layout-stack > * {
-  margin-left: 0;
+  margin-inline-start: 0;
 }
 .avatar-group.layout-stack > * + * {
-  margin-left: var(--va-group-overlap);
+  margin-inline-start: var(--va-group-overlap);
 }
 .avatar-group.layout-triangle {
   position: relative;
@@ -300,12 +314,12 @@ export default defineComponent({
 }
 .avatar-group.layout-triangle > *:nth-child(2) {
   bottom: 0;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 5 !important;
 }
 .avatar-group.layout-triangle > *:nth-child(3) {
   bottom: 0;
-  right: 0;
+  inset-inline-end: 0;
   z-index: 1 !important;
 }
 .avatar-overflow {

@@ -177,6 +177,14 @@ describe('Avatar Component', () => {
     expect(style).toContain('--va-color:')
   })
 
+  it('sizes Unicode initials by visible grapheme count', () => {
+    const single = mount(Avatar, { props: { name: '😀' } })
+    const pair = mount(Avatar, { props: { name: '😀 Smith' } })
+
+    expect(single.find('.container').attributes('style')).toContain('--va-font-size: 20px')
+    expect(pair.find('.container').attributes('style')).toContain('--va-font-size: 16px')
+  })
+
   it('renders content in status slot', () => {
     const wrapper = mount(Avatar, {
       props: { name: 'John Doe' },

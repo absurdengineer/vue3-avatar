@@ -15,7 +15,7 @@ description: Props and events reference for AvatarGroup — stack avatars with o
 | `overlap` | `Number` | `10` | Amount, in pixels, that stacked avatars overlap. |
 | `borderColor` | `String` | `'white'` | Border colour passed to every visible child avatar. |
 | `size` | `Number` | `40` | Size passed to every visible child avatar and used by the overflow badge. |
-| `layout` | `'stack' \| 'triangle'` | `'stack'` | Horizontal stack or a three-item triangle layout. |
+| `layout` | `'stack' \| 'triangle'` | `'stack'` | Horizontal stack or a three-item triangle layout. Stack overlap follows the surrounding `dir` (`ltr` or `rtl`). |
 | `pointer` | `Boolean` | `false` | Uses a pointer cursor for the group. |
 | `onClick` | `Function` | — | Click callback for the group. |
 | `overflowTooltip` | `Boolean \| String` | — | Overrides the tooltip content on the `+N` badge, or disables it with `false`. |
@@ -49,6 +49,8 @@ description: Props and events reference for AvatarGroup — stack avatars with o
 ```
 
 Use `layout="triangle"` for a compact, three-item composition. When there are more children than the layout can show, the final visible item becomes the overflow badge.
+
+Stack overlap and triangle edge placement follow the surrounding text direction, so the same group works in both left-to-right and right-to-left layouts. If `onClick` is provided, only activation on the group root invokes that callback; child avatars and the `+N` overflow badge keep their own interactions.
 
 ## Overflow tooltip
 
